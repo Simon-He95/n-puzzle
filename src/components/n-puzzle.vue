@@ -44,6 +44,7 @@ isFresh();
 function isFresh() {
   let inverse = 0;
   const preNumber = [];
+  const odd = (n & 1) === 1;
   collect.reduce((pre, cur) => {
     preNumber.push(pre);
     preNumber.forEach((item) => {
@@ -52,7 +53,10 @@ function isFresh() {
     return cur;
   }, 0);
   collect.length = 0;
-  if ((inverse & 1) === 1) {
+  if (odd && (inverse & 1) === 1) {
+    // 无解重新生成
+    rest();
+  } else if (!odd && (inverse & 1) === 0) {
     // 无解重新生成
     rest();
   }
