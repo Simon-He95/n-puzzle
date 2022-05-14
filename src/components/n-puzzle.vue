@@ -1,6 +1,7 @@
 <script setup lang="ts">
 let n = $ref<number>(3);
 const numbers: number[] = [];
+const step = $ref(0);
 type Block = {
   number: undefined | number;
   x: number;
@@ -10,31 +11,63 @@ type Block = {
 for (let i = 1; i < n * n; i++) {
   numbers.push(i);
 }
-let array = $ref<Block>(
-  Array.from({ length: n }, (_, y) =>
-    Array.from({ length: n }, (_, x) => {
-      return {
-        number: x === 0 && y === 0 ? undefined : randomNumbers(),
-        x: x,
-        y: y,
-      };
-    })
-  )
-);
 
-function rest() {
-  for (let i = 1; i < n * n; i++) {
-    numbers.push(i);
-  }
-  array = Array.from({ length: n }, (_, y) =>
+const now = $(useNow());
+const start = $ref(Date.now());
+const countDown = $computed(() => Math.round((+now - start) / 1000));
+
+function initData() {
+  return Array.from({ length: n }, (_, y) =>
     Array.from({ length: n }, (_, x) => {
+      let number = 0;
+      if (x === 0 && y === 0) collect.push(0);
+      else {
+        number = randomNumbers();
+        collect.push(number);
+      }
+
       return {
-        number: x === 0 && y === 0 ? undefined : randomNumbers(),
+        number: x === 0 && y === 0 ? undefined : number,
         x: x,
         y: y,
       };
     })
   );
+}
+
+const collect = [];
+let array = $ref<Block>(initData());
+let win = $ref(false);
+isFresh();
+
+// 判断此题是否有解
+function isFresh() {
+  let inverse = 0;
+  const preNumber = [];
+  collect.reduce((pre, cur) => {
+    preNumber.push(pre);
+    preNumber.forEach((item) => {
+      if (item > cur) inverse++;
+    });
+    return cur;
+  }, 0);
+  collect.length = 0;
+  if ((inverse & 1) === 1) {
+    // 无解重新生成
+    rest();
+  }
+}
+
+function rest() {
+  win = false;
+  start = Date.now();
+  step = 0;
+  for (let i = 1; i < n * n; i++) {
+    numbers.push(i);
+  }
+  array = initData();
+  isFresh();
+  return array;
 }
 
 function randomNumbers() {
@@ -45,11 +78,12 @@ function move(block: Block) {
   // 判断上下左右是否有空白格
   if (!block.number) return;
   if (canMove(block)) {
+    step++;
+
     // 判断胜利条件
     if (isWin()) {
-      setTimeout(() => {
-        alert("恭喜你，你赢了！");
-      });
+      win = true;
+      alert(`you win！ cost: ${countDown}s, step: ${step}`);
     }
   } else {
     // alert("改数字不能被交换");
@@ -99,19 +133,27 @@ function canMove(block: Block): Boolean {
   return false;
 }
 
-function newGame(difficulty: "easy" | "medium" | "hard") {
+function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
   switch (difficulty) {
     case "easy":
+      if (n === 3) return;
       n = 3;
       rest();
 
       return;
     case "medium":
+      if (n === 4) return;
       n = 4;
       rest();
       return;
     case "hard":
+      if (n === 5) return;
       n = 5;
+      rest();
+      return;
+    case "evil":
+      if (n === 6) return;
+      n = 6;
       rest();
       return;
   }
@@ -120,15 +162,40 @@ function newGame(difficulty: "easy" | "medium" | "hard") {
 
 <template>
   <div font-sans p="y-10" text="center gray-700 dark:gray-200">
-    <h1>n puzzle</h1>
+    <p text-3xl>n puzzle</p>
     {{ n }} x {{ n }}
+    <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
+      <div i-carbon-timer />
+      {{ countDown }}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        role="img"
+        width="1em"
+        height="1em"
+        preserveAspectRatio="xMidYMid meet"
+        viewBox="0 0 512 512"
+        m-l-1
+      >
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-miterlimit="10"
+          stroke-width="32"
+          d="M200 246.84c8.81 58.62-7.33 90.67-52.91 97.41c-50.65 7.49-71.52-26.44-80.33-85.06c-11.85-78.88 16-127.94 55.71-131.1c36.14-2.87 68.71 60.14 77.53 118.75Zm23.65 162.69c3.13 33.28-14.86 64.34-42 69.66c-27.4 5.36-58.71-16.37-65.09-49.19s17.75-34.56 47.32-40.21s55.99-20.4 59.77 19.74ZM312 150.83c-8.81 58.62 7.33 90.67 52.9 97.41c50.66 7.49 71.52-26.44 80.33-85.06c11.86-78.89-16-128.22-55.7-131.1c-36.4-2.64-68.71 60.13-77.53 118.75Zm-23.65 162.7c-3.13 33.27 14.86 64.34 42 69.66c27.4 5.36 58.71-16.37 65.09-49.19s-17.75-34.56-47.32-40.22s-55.99-20.4-59.77 19.75Z"
+        />
+      </svg>
+      {{ step }}
+    </div>
+
     <div flex="~ gap-1" justify="center" p4>
       <button btn @click="rest()">New Game</button>
       <button btn @click="newGame('easy')">Easy</button>
       <button btn @click="newGame('medium')">Medium</button>
       <button btn @click="newGame('hard')">Hard</button>
+      <button btn @click="newGame('evil')">Evil</button>
     </div>
-    <div w-full overflow-auto>
+    <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
       <div
         v-for="(row, y) in array"
         :key="y"
