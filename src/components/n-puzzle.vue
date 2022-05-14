@@ -1,11 +1,16 @@
 <script setup lang="ts">
-let n = $ref(3);
-const numbers = [];
+let n = $ref<number>(3);
+const numbers: number[] = [];
+type Block = {
+  number: undefined | number;
+  x: number;
+  y: number;
+};
 
 for (let i = 1; i < n * n; i++) {
   numbers.push(i);
 }
-let array = $ref(
+let array = $ref<Block>(
   Array.from({ length: n }, (_, y) =>
     Array.from({ length: n }, (_, x) => {
       return {
@@ -33,11 +38,10 @@ function rest() {
 }
 
 function randomNumbers() {
-  const result = numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0];
-  return result;
+  return numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0];
 }
 
-function move(block) {
+function move(block: Block) {
   // 判断上下左右是否有空白格
   if (!block.number) return;
   if (canMove(block)) {
@@ -52,7 +56,7 @@ function move(block) {
   }
 }
 
-function isWin() {
+function isWin(): Boolean {
   return array.every((row) => {
     return row.every((item) => {
       if (item.x === n - 1 && item.y === n - 1 && item.number === undefined) {
@@ -63,7 +67,7 @@ function isWin() {
   });
 }
 
-function canMove(block) {
+function canMove(block: Block): Boolean {
   const { x, y, number } = block;
   if (y > 0 && array[y - 1][x].number === undefined) {
     const temp = array[y - 1][x].number;
