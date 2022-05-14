@@ -6,6 +6,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Footer: typeof import('./src/components/Footer.vue')['default']
     NPuzzle: typeof import('./src/components/n-puzzle.vue')['default']
+    Typing: typeof import('./src/components/Typing.vue')['default']
   }
 }
 
