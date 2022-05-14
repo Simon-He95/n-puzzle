@@ -133,7 +133,9 @@ function canMove(block: Block): Boolean {
   return false;
 }
 
+const status = $ref("easy");
 function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
+  status = difficulty;
   switch (difficulty) {
     case "easy":
       if (n === 3) return;
@@ -161,7 +163,7 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
 </script>
 
 <template>
-  <div font-sans p="y-10" text="center gray-700 dark:gray-200">
+  <div font-sans p="t-10" text="center gray-700 dark:gray-200">
     <p text-3xl><Typing interval="100">n puzzle</Typing></p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
@@ -221,6 +223,9 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
           {{ block.number }}
         </div>
       </div>
+    </div>
+    <div m-t-2>
+      {{ status }}
     </div>
   </div>
 </template>
