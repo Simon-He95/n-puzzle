@@ -87,7 +87,8 @@ function move(block: Block) {
     // 判断胜利条件
     if (isWin()) {
       win = true;
-      alert(`you win！ cost: ${countDown}s, step: ${step}`);
+      alert(`you win！ 
+      cost: ${countDown}s , step: ${step}`);
     }
   } else {
     // alert("改数字不能被交换");
