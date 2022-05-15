@@ -197,12 +197,12 @@ function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
       return;
     case "Medium":
       if (n === 5) return;
-      n = 4;
+      n = 5;
       rest();
       return;
     case "Hard":
       if (n === 6) return;
-      n = 5;
+      n = 6;
       rest();
       return;
     case "Evil":
@@ -211,6 +211,24 @@ function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
       rest();
       return;
   }
+}
+
+function sizeStyle() {
+  const result = {};
+  if (status === "Easy") {
+    result["min-width"] = "5.75rem";
+    result["min-height"] = "5.75rem";
+  } else if (status === "Medium") {
+    result["min-width"] = "4rem";
+    result["min-height"] = "4rem";
+  } else if (status === "Hard") {
+    result["min-width"] = "3.25rem";
+    result["min-height"] = "3.25rem";
+  } else if (status === "Evil") {
+    result["min-width"] = "2.75rem";
+    result["min-height"] = "2.75rem";
+  }
+  return result;
 }
 </script>
 
@@ -362,7 +380,7 @@ function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
     </div>
 
     <div flex="~ gap-1" justify="center" p4>
-      <button btn @click="rest()">New Game</button>
+      <button btn @click="rest()">Rest</button>
       <button btn @click="newGame('Easy')">Easy</button>
       <button btn @click="newGame('Medium')">Medium</button>
       <button btn @click="newGame('Hard')">Hard</button>
@@ -384,19 +402,15 @@ function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
           items-center
           justify-center
           border-box
-          min-w-10
-          min-h-10
           m="1px"
           border="0.5 gray-400/10"
           class="bg-gray-500/10 hover:bg-gray-500/20"
           @click.prevent="move(block)"
+          :style="sizeStyle()"
         >
           {{ block.number }}
         </div>
       </div>
-    </div>
-    <div m-t-2>
-      {{ status }}
     </div>
   </div>
 </template>
