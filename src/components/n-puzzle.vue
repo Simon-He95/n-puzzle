@@ -285,8 +285,8 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
       <div m-y-4 text-2xl>
         <vivid-typing :interval="200" :infinity="true">{{ status }} 排名</vivid-typing>
       </div>
-      <div text-1 text-left>
-        注:排名会每周更新一次到github, please contribute your
+      <div text-sm text-left>
+        注：排名会每周更新一次on GitHub, please contribute your
         <svg
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
@@ -315,12 +315,12 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
           style="white-space: nowrap"
         >
           {{ i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1 }}
-          {{ user.name || "未知用户" }}, {{ user.steps }}步, {{ user.times }}s
+          Player：{{ user.name || "未知用户" }} {{ user.steps }}步 {{ user.times }}秒
         </div>
       </div>
     </div>
   </div>
-  <div font-sans p="t-10" text="center gray-700 dark:gray-200">
+  <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="showRank = false">
     <p text-3xl><vivid-typing :interval="100">n puzzle</vivid-typing></p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
