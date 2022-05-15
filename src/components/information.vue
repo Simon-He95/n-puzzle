@@ -31,11 +31,12 @@ function closeShow() {
     v-show="show"
   >
     <h1 p="y-10" c-white text-3xl>n puzzle</h1>
-    <div p-b-10 c-yellow-2>
-      备注：姓名会被记录到排名，按照步数交少排名，相同步数按用时较少排名
+    <div p-b-10 c-yellow-2 text-sm text-left>
+      Describes：<br />Names will be recorded in the rankings, ranked by fewer steps, and
+      if the number of steps is the same rank by less time. Now let's start playing!
     </div>
     <div c-white>
-      请输入你的名字：<input
+      Input your name：<input
         m-t-2
         border-rd-1
         c-dark
@@ -45,8 +46,8 @@ function closeShow() {
       />
     </div>
 
-    <button type="submit" w-50 h-10 m-t-10 border-rd="1" bg-warmGray @click="closeShow">
-      确认
+    <button type="submit" w-50 h-10 m-t-10 border-rd="1" bg-yellow @click="closeShow">
+      Start Game
     </button>
   </div>
 </template>
