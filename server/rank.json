@@ -1,21 +1,5 @@
 {
-  "Easy": [
-    {
-      "times": "17",
-      "steps": "26",
-      "name": "simon"
-    },
-    {
-      "times": "15",
-      "steps": "30",
-      "name": "simon"
-    },
-    {
-      "times": "14",
-      "steps": "28",
-      "name": "simon"
-    }
-  ],
+  "Easy": [],
   "Medium": [],
   "Hard": [],
   "Evil": []

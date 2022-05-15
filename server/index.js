@@ -17,7 +17,6 @@ app.all("*", function (req, res, next) {
 })
 app.get('/rank', (req, res) => {
   const { times, steps, name, status, type } = req.query
-  console.log(type, json[status])
   if (type === 'init') {
     return res.json(json[status])
   }

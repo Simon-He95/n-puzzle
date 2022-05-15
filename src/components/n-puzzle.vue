@@ -3,8 +3,8 @@ import axios from "axios";
 import { name } from "../config";
 import { isDark } from "~/composables";
 
-// const baseUrl = "http://81.68.90.128:5001/rank?";
-const baseUrl = "http://localhost:5001/rank?";
+const baseUrl = "http://81.68.90.128:5001/rank?";
+// const baseUrl = "http://localhost:5001/rank?";
 
 useStorage("playName", name);
 
@@ -215,7 +215,6 @@ function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
 </script>
 
 <template>
-  <button @click="updateRank()">test</button>
   <information :show="changeName" :close="change"></information>
   <div flex="~" justify-between box-border p-4>
     <div w-30 text-left overflow-hidden text-ellipsis @click="changeName = true">
