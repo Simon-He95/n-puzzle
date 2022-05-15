@@ -28,12 +28,11 @@ app.get('/rank', (req, res) => {
     })
     json[status].sort((a, b) => a.times - b.times).sort((a, b) => a.step - b.step)
     // 写入
-    fs.writeFile('./rank.json', JSON.stringify(json), (err) => {
-      console.log('err:', err)
-    })
+    fs.writeFileSync('./rank.json', JSON.stringify(json))
   } else {
     for (let i = 0; i < json[status].length; i++) {
-      if (json[status][i].steps > steps) {
+      const { steps: itemSteps, times: itemTimes } = json[status][i]
+      if (+itemSteps > +steps) {
         json[status].splice(i, 0, {
           times,
           steps,
@@ -41,8 +40,8 @@ app.get('/rank', (req, res) => {
         })
 
         json[status].pop()
-        break
-      } else if (json[status][i].steps === steps && json[status][i].times > times) {
+        break;
+      } else if (itemSteps === steps && +itemTimes > +times) {
         json[status].splice(i, 0, {
           times,
           steps,
@@ -52,10 +51,7 @@ app.get('/rank', (req, res) => {
         break
       }
     }
-
-    fs.writeFile('./rank.json', JSON.stringify(json), (err) => {
-      console.log('err:', err)
-    })
+    fs.writeFileSync('./rank.json', JSON.stringify(json))
   }
   res.json(json[status])
 })
