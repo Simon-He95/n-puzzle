@@ -26,7 +26,7 @@ app.get('/rank', (req, res) => {
       steps,
       name
     })
-    arr.sort((a, b) => a.times - b.times).sort((a, b) => a.step - b.step)
+    json[status].sort((a, b) => a.times - b.times).sort((a, b) => a.step - b.step)
     // 写入
     fs.writeFile('./rank.json', JSON.stringify(json), (err) => {
       console.log('err:', err)
