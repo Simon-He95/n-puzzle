@@ -36,17 +36,10 @@ function closeShow() {
       if the number of steps is the same rank by less time. Now let's start playing!
     </div>
     <div c-white>
-      Input your name：<input
-        m-t-2
-        border-rd-1
-        c-dark
-        indent-1
-        type="text"
-        v-model="name"
-      />
+      name：<input m-t-2 border-rd-1 c-dark indent-1 type="text" v-model="name" />
     </div>
 
-    <button type="submit" w-50 h-10 m-t-10 border-rd="1" bg-yellow @click="closeShow">
+    <button type="submit" w-50 h-10 m-t-15 border-rd="1" bg-yellow @click="closeShow">
       Start Game
     </button>
   </div>
