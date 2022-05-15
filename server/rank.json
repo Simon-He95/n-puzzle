@@ -1,1 +1,22 @@
-{"easy":[{"times":"1","steps":"0","name":"simon"},{"times":"10","steps":"0","name":"simon"},{"times":"13","steps":"0","name":"simon"}],"medium":[],"hard":[],"evil":[]}
+{
+  "Easy": [
+    {
+      "times": "17",
+      "steps": "26",
+      "name": "simon"
+    },
+    {
+      "times": "15",
+      "steps": "30",
+      "name": "simon"
+    },
+    {
+      "times": "14",
+      "steps": "28",
+      "name": "simon"
+    }
+  ],
+  "Medium": [],
+  "Hard": [],
+  "Evil": []
+}

@@ -3,8 +3,8 @@ import axios from "axios";
 import { name } from "../config";
 import { isDark } from "~/composables";
 
-const baseUrl = "http://81.68.90.128:5001/rank?";
-// const baseUrl = "http://localhost:5001/rank?";
+// const baseUrl = "http://81.68.90.128:5001/rank?";
+const baseUrl = "http://localhost:5001/rank?";
 
 useStorage("playName", name);
 
@@ -14,6 +14,7 @@ if (name.value) {
 }
 function change() {
   changeName = false;
+  start = Date.now();
 }
 let rankList = $ref([]);
 const showRank = $ref(false);
@@ -23,6 +24,7 @@ function initRank() {
     .get(`${baseUrl}type=init&status=${status}`)
     .then(function (response) {
       rankList = response.data;
+      console.log(rankList);
     })
     .catch(function (error) {
       console.log(error);
@@ -36,6 +38,7 @@ function updateRank() {
     )
     .then(function (response) {
       rankList = response.data;
+      console.log(rankList);
     })
     .catch(function (error) {
       console.log(error);
@@ -132,7 +135,7 @@ function move(block: Block) {
       win = true;
       updateRank();
       alert(
-        `congratulations！score: ${countDown}s  ${steps}steps，In the top right corner is the ranking, let's challenge it, furthermore please remember to click star on GitHub！`
+        `Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. `
       );
     }
   } else {
@@ -183,26 +186,26 @@ function canMove(block: Block): Boolean {
   return false;
 }
 
-const status = $ref("easy");
-function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
+const status = $ref("Easy");
+function newGame(difficulty: "Easy" | "Medium" | "Hard" | "Evil") {
   status = difficulty;
   switch (difficulty) {
-    case "easy":
+    case "Easy":
       if (n === 3) return;
       n = 3;
       rest();
       return;
-    case "medium":
+    case "Medium":
       if (n === 5) return;
       n = 4;
       rest();
       return;
-    case "hard":
+    case "Hard":
       if (n === 6) return;
       n = 5;
       rest();
       return;
-    case "evil":
+    case "Evil":
       if (n === 8) return;
       n = 8;
       rest();
@@ -285,27 +288,9 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
         />
       </svg>
       <div m-y-4 text-2xl>
-        <vivid-typing :interval="200" :infinity="true">{{ status }} 排名</vivid-typing>
-      </div>
-      <div text-sm text-left>
-        注：排名会每周更新一次on GitHub, please contribute your
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-          role="img"
-          inline
-          style="vertical-align: -0.125em"
-          width="1em"
-          height="1em"
-          preserveAspectRatio="xMidYMid meet"
-          viewBox="0 0 64 64"
-          text-sm
+        <vivid-typing :interval="100" :infinity="true"
+          >{{ status }}-Model Ranking</vivid-typing
         >
-          <path
-            fill="#ffce31"
-            d="M62 25.2H39.1L32 3l-7.1 22.2H2l18.5 13.7l-7 22.1L32 47.3L50.5 61l-7.1-22.2L62 25.2z"
-          />
-        </svg>
       </div>
       <div p-y-1>
         <div
@@ -317,13 +302,18 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
           style="white-space: nowrap"
         >
           {{ i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1 }}
-          Player：{{ user.name || "未知用户" }} {{ user.steps }}步 {{ user.times }}秒
+          {{ user.name || "未知用户" }}: <span font-bold>{{ user.steps }}</span> Steps,
+          <span font-bold>{{ user.times }}</span> Seconds
         </div>
+      </div>
+      <div text-sm text-left>
+        Reminder: The ranking on GitHub will be updated once a week. Appreciate your
+        stars⭐
       </div>
     </div>
   </div>
   <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="showRank = false">
-    <p text-3xl><vivid-typing :interval="100">n puzzle</vivid-typing></p>
+    <p text-3xl><vivid-typing :interval="100">N PUZZLE</vivid-typing></p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
       <div i-carbon-timer />
@@ -351,10 +341,10 @@ function newGame(difficulty: "easy" | "medium" | "hard" | "evil") {
 
     <div flex="~ gap-1" justify="center" p4>
       <button btn @click="rest()">New Game</button>
-      <button btn @click="newGame('easy')">Easy</button>
-      <button btn @click="newGame('medium')">Medium</button>
-      <button btn @click="newGame('hard')">Hard</button>
-      <button btn @click="newGame('evil')">Evil</button>
+      <button btn @click="newGame('Easy')">Easy</button>
+      <button btn @click="newGame('Medium')">Medium</button>
+      <button btn @click="newGame('Hard')">Hard</button>
+      <button btn @click="newGame('Evil')">Evil</button>
     </div>
     <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
       <div

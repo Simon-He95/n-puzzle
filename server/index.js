@@ -17,6 +17,7 @@ app.all("*", function (req, res, next) {
 })
 app.get('/rank', (req, res) => {
   const { times, steps, name, status, type } = req.query
+  console.log(type, json[status])
   if (type === 'init') {
     return res.json(json[status])
   }
@@ -26,13 +27,7 @@ app.get('/rank', (req, res) => {
       steps,
       name
     })
-    json[status].sort((a, b) => {
-      if (a.step - b.step > 0)
-        return true
-      if (a.step === b.step && b.times - a.times > 0)
-        return true
-      return false
-    })
+    arr.sort((a, b) => a.times - b.times).sort((a, b) => a.step - b.step)
     // 写入
     fs.writeFile('./rank.json', JSON.stringify(json), (err) => {
       console.log('err:', err)

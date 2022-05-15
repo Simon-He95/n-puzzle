@@ -30,10 +30,12 @@ function closeShow() {
     p-x-10
     v-show="show"
   >
-    <h1 p="y-10" c-white text-3xl>n puzzle</h1>
+    <h1 p="y-10" c-white text-3xl>N PUZZLE</h1>
     <div p-b-10 c-yellow-2 text-sm text-left>
-      Describes：<br />Names will be recorded in the rankings, ranked by fewer steps, and
-      if the number of steps is the same rank by less time. Now let's start playing!
+      Notice:<br />
+      Your log name is required before you start this puzzle journey! And your name will
+      be displayed in the ranking when you hit the top three with fewer steps. If same
+      steps, the shortest time wins! <br /><br />Let’s rock and roll NOW!
     </div>
     <div c-white>
       name：<input m-t-2 border-rd-1 c-dark indent-1 type="text" v-model="name" />
