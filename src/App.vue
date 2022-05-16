@@ -1,6 +1,6 @@
 <template>
   <main font-sans text="center gray-700 dark:gray-200">
-    <n-puzzle />
+    <router-view></router-view>
     <Footer />
   </main>
 </template>

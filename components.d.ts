@@ -6,7 +6,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     Footer: typeof import('./src/components/Footer.vue')['default']
     Information: typeof import('./src/components/information.vue')['default']
-    NPuzzle: typeof import('./src/components/n-puzzle.vue')['default']
+    Number: typeof import('./src/components/number.vue')['default']
+    Picture: typeof import('./src/components/picture.vue')['default']
   }
 }
 
