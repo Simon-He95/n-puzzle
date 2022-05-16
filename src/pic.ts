@@ -115,7 +115,6 @@ export async function initData(n: number, src: string) {
 }
 
 export function isWin(): boolean {
-  debugger
   return array.value.every((row) => {
     return row.every((item: any) => {
       if (item.x === n.value - 1 && item.y === n.value - 1 && item.pos === emptyFlag) {
