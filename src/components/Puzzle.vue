@@ -197,7 +197,9 @@ async function getRank() {
     </div>
   </div>
   <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="showRank = false">
-    <p text-3xl><vivid-typing :interval="100">N PUZZLE</vivid-typing></p>
+    <p text-3xl animate-heart-beat m-b-5>
+      <vivid-typing :interval="100">N PUZZLE</vivid-typing>
+    </p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
       <div i-carbon-timer />

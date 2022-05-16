@@ -29,6 +29,8 @@ function initData() {
         number,
         x: x,
         y: y,
+        animateX: false,
+        animateY: false,
       };
     })
   );
@@ -92,24 +94,48 @@ function canMove(block: Block): Boolean {
     const temp = array.value[y - 1][x].number;
     array.value[y - 1][x].number = number;
     array.value[y][x].number = temp;
+    array.value[y][x].animateY = true;
+    array.value[y - 1][x].animateY = true;
+    setTimeout(() => {
+      array.value[y - 1][x].animateY = false;
+      array.value[y][x].animateY = false;
+    }, 50);
     return true;
   }
   if (y < n.value - 1 && array.value[y + 1][x].number === emptyFlag) {
     const temp = array.value[y + 1][x].number;
     array.value[y + 1][x].number = number;
     array.value[y][x].number = temp;
+    array.value[y][x].animateY = true;
+    array.value[y + 1][x].animateY = true;
+    setTimeout(() => {
+      array.value[y + 1][x].animateY = false;
+      array.value[y][x].animateY = false;
+    }, 50);
     return true;
   }
   if (x > 0 && array.value[y][x - 1].number === emptyFlag) {
     const temp = array.value[y][x - 1].number;
     array.value[y][x - 1].number = number;
     array.value[y][x].number = temp;
+    array.value[y][x].animateX = true;
+    array.value[y][x - 1].animateX = true;
+    setTimeout(() => {
+      array.value[y][x - 1].animateX = false;
+      array.value[y][x].animateX = false;
+    }, 50);
     return true;
   }
   if (x < n.value - 1 && array.value[y][x + 1].number === emptyFlag) {
     const temp = array.value[y][x + 1].number;
     array.value[y][x + 1].number = number;
     array.value[y][x].number = temp;
+    array.value[y][x].animateX = true;
+    array.value[y][x + 1].animateX = true;
+    setTimeout(() => {
+      array.value[y][x + 1].animateX = false;
+      array.value[y][x].animateX = false;
+    }, 50);
     return true;
   }
   return false;
@@ -162,6 +188,10 @@ defineExpose({
       class="bg-gray-500/10 hover:bg-gray-500/20"
       @click.prevent="move(block)"
       :style="sizeStyle()"
+      :class="[
+        block?.animateY ? 'animate-shake-y' : '',
+        block?.animateX ? 'animate-shake-x' : '',
+      ]"
     >
       {{ block.number === 0 ? "" : block.number }}
     </div>

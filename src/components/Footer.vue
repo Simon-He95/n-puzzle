@@ -11,7 +11,7 @@ function changeModel() {
 </script>
 
 <template>
-  <nav text-xl mt-6 inline-flex gap-2 items-center>
+  <nav text-xl p-y-6 inline-flex gap-2 items-center>
     <button @click="changeModel()" text-2xl>
       <svg
         v-show="model === 'number'"

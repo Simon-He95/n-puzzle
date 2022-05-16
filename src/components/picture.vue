@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { initData, isWin, emptyFlag, randomNumbers } from "../pic";
-import { steps, win, n, start, array } from "../config";
+import { steps, win, n, start, array, name } from "../config";
 import { updateRank } from "../request";
 import axios from "axios";
 
@@ -10,19 +10,26 @@ let { status, countDown } = defineProps<{
 }>();
 
 let loading = $ref(true);
+const url = "https://source.unsplash.com/collection/94734566";
 
 const base64 = $ref("");
+const ratio = $ref("1.5");
 function getImage() {
   axios({
     methods: "get",
     responseType: "blob",
-    url: "https://unsplash.it/1600/900?random",
+    url,
   }).then((res) => {
     let oFileReader = new FileReader();
     oFileReader.readAsDataURL(res.data);
     oFileReader.onloadend = function (e) {
-      // 此处拿到的已经是 base64的图片了
+      const image = new Image();
       base64 = e.target.result;
+      image.src = base64;
+      image.onload = () => {
+        ratio = (image.width / image.height).toFixed(1);
+        console.log((image.width / image.height).toFixed(1));
+      };
       setData();
       loading = false;
     };
@@ -48,12 +55,15 @@ async function setData() {
 
 async function movepic(block: Block) {
   if (!block || block.url === emptyFlag) return;
+  console.log(array.value);
   if (canMove(block)) {
     steps.value++;
     // 判断胜利条件
-    if (isWin(array.value)) {
+    if (isWin()) {
       win.value = true;
-      rankList = await updateRank(countDown, steps.value, name.value, status);
+      updateRank(countDown, steps.value, name.value, status).then(
+        (result) => (rankList = result)
+      );
       alert(
         `Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. `
       );
@@ -71,6 +81,12 @@ function canMove(block: Block): Boolean {
     array.value[y - 1][x].pos = pos;
     array.value[y][x].url = tempUrl;
     array.value[y][x].pos = temPos;
+    array.value[y][x].animateY = true;
+    array.value[y - 1][x].animateY = true;
+    setTimeout(() => {
+      array.value[y - 1][x].animateY = false;
+      array.value[y][x].animateY = false;
+    }, 50);
     return true;
   }
   if (y < n.value - 1 && array.value[y + 1][x].url === emptyFlag) {
@@ -79,15 +95,26 @@ function canMove(block: Block): Boolean {
     array.value[y + 1][x].pos = pos;
     array.value[y][x].url = tempUrl;
     array.value[y][x].pos = temPos;
+    array.value[y][x].animateY = true;
+    array.value[y + 1][x].animateY = true;
+    setTimeout(() => {
+      array.value[y + 1][x].animateY = false;
+      array.value[y][x].animateY = false;
+    }, 50);
     return true;
   }
   if (x > 0 && array.value[y][x - 1].url === emptyFlag) {
     const { url: tempUrl, pos: temPos } = array.value[y][x - 1];
-
     array.value[y][x - 1].url = url;
     array.value[y][x - 1].pos = pos;
     array.value[y][x].url = tempUrl;
     array.value[y][x].pos = temPos;
+    array.value[y][x].animateX = true;
+    array.value[y][x - 1].animateX = true;
+    setTimeout(() => {
+      array.value[y][x - 1].animateX = false;
+      array.value[y][x].animateX = false;
+    }, 50);
     return true;
   }
   if (x < n.value - 1 && array.value[y][x + 1].url === emptyFlag) {
@@ -96,6 +123,12 @@ function canMove(block: Block): Boolean {
     array.value[y][x + 1].pos = pos;
     array.value[y][x].url = tempUrl;
     array.value[y][x].pos = temPos;
+    array.value[y][x].animateX = true;
+    array.value[y][x + 1].animateX = true;
+    setTimeout(() => {
+      array.value[y][x + 1].animateX = false;
+      array.value[y][x].animateX = false;
+    }, 50);
     return true;
   }
   return false;
@@ -134,17 +167,18 @@ function sizeStyle() {
   const result = {};
   if (status === "Easy") {
     result["width"] = "5.75rem !important";
-    result["height"] = "5.75rem !important";
+    result["height"] = "auto !important";
   } else if (status === "Medium") {
     result["width"] = "4rem !important";
-    result["height"] = "4rem !important";
+    result["height"] = "auto !important";
   } else if (status === "Hard") {
     result["width"] = "3.25rem !important";
-    result["height"] = "3.25rem !important";
+    result["height"] = "auto !important";
   } else if (status === "Evil") {
     result["width"] = "2.75rem !important";
-    result["height"] = "2.75rem !important";
+    result["height"] = "auto !important";
   }
+  result["aspect-ratio"] = ratio;
   return result;
 }
 
@@ -154,9 +188,10 @@ defineExpose({
 </script>
 
 <template>
-  <div w-full overflow-auto m-t-10 :style="{ 'pointer-events': win ? 'none' : '' }">
+  <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
     <div v-for="(row, y) in array" :key="y" flex="~" items-center justify-center w-max ma>
       <img
+        object-fill
         v-if="row.length"
         v-for="block in row"
         w-auto
@@ -167,120 +202,21 @@ defineExpose({
         :title="block.pos"
         m="1px"
         border="0.5 gray-400/10"
-        class="bg-gray-500/10 hover:bg-gray-500/20"
+        :class="[
+          'bg-gray-500/10',
+          'hover:bg-gray-500/20',
+          block?.animateY ? 'animate-shake-y' : '',
+          block?.animateX ? 'animate-shake-x' : '',
+        ]"
         :src="block?.url"
         @click="movepic(block)"
         :style="sizeStyle()"
       />
     </div>
-    <img w-25 absolute right-1 top-15 border-rd-2 :src="base64" alt="" />
+    <img w-20 absolute right-1 top-15 border-rd-2 :src="base64" alt="" />
   </div>
-  <div
-    absolute
-    style="left: 50%; top: 50%; transform: translate(-50%, -50%)"
-    z-20
-    v-if="loading"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      role="img"
-      width="1em"
-      height="1em"
-      preserveAspectRatio="xMidYMid meet"
-      viewBox="0 0 24 24"
-      text-7xl
-    >
-      <circle cx="12" cy="2" r="0" fill="currentColor">
-        <animate
-          attributeName="r"
-          begin="0"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(45 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.125s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(90 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.25s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(135 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.375s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(180 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.5s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(225 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.625s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(270 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.75s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-      <circle cx="12" cy="2" r="0" fill="currentColor" transform="rotate(315 12 12)">
-        <animate
-          attributeName="r"
-          begin="0.875s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
-    </svg>
-  </div>
+
+  <Loading v-if="loading" />
 </template>
 
 <style scoped></style>

@@ -1,4 +1,5 @@
 const collect: any[] = []
+import { array, n } from './config'
 export const randomNumbers: number[] = []
 
 export const emptyFlag = "./empty.png";
@@ -98,25 +99,29 @@ export async function initData(n: number, src: string) {
       if (i === 0 && j === 0) {
         array[i][j].url = emptyFlag
         array[i][j].pos = emptyFlag
+        array[i][j].animateX = false
+        array[i][j].animateY = false
         continue
       }
       const { url, pos, } = randomPic(copyNumbers)
       randomNumbers.push(pos)
       array[i][j].url = url
       array[i][j].pos = pos
+      array[i][j].animateX = false
+      array[i][j].animateY = false
     }
   }
   return array
 }
 
-export function isWin(array: any[]): boolean {
-  const n = array.length
-  return array.every((row) => {
+export function isWin(): boolean {
+  debugger
+  return array.value.every((row) => {
     return row.every((item: any) => {
-      if (item.x === n - 1 && item.y === n - 1 && item.pos === emptyFlag) {
+      if (item.x === n.value - 1 && item.y === n.value - 1 && item.pos === emptyFlag) {
         return true;
       }
-      return item.pos === item.x + item.y * n;
+      return item.pos === item.x + item.y * n.value;
     });
   });
 }
