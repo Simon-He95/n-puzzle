@@ -1,7 +1,7 @@
 const collect: any[] = []
 export const randomNumbers: number[] = []
 
-export const emptyFlag = "/empty.png";
+export const emptyFlag = "./empty.png";
 const pictureMap = new Map<string, any>()
 
 function splitImage(n: number, src: string) {
