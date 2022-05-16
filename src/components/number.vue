@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GameStaus, Block } from "../type";
+import { GameStaus, NumberBlock } from "../type";
 import { win, steps, start, rankList, name, n, array } from "../config";
 import { updateRank } from "../request";
 
@@ -47,7 +47,7 @@ function reset() {
 function randomNumbers() {
   return numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0];
 }
-async function move(block: Block) {
+async function move(block: NumberBlock) {
   // 判断上下左右是否有空白格
   if (block.number === 0) return;
   if (canMove(block)) {
@@ -88,7 +88,7 @@ function isFresh() {
   }
 }
 
-function canMove(block: Block): Boolean {
+function canMove(block: NumberBlock): Boolean {
   const { x, y, number } = block;
   if (y > 0 && array.value[y - 1][x].number === emptyFlag) {
     const temp = array.value[y - 1][x].number;

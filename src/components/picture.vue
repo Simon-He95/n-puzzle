@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { initData, isWin, emptyFlag, randomNumbers } from "../pic";
-import { steps, win, n, start, array, name } from "../config";
-import { updateRank } from "../request";
+import { steps, win, n, start, array, name, base64 } from "../config";
+import { updateRank, getImage } from "../request";
+import { PictureBlock } from "../type";
 import axios from "axios";
 
 let { status, countDown } = defineProps<{
@@ -12,48 +13,29 @@ let { status, countDown } = defineProps<{
 let loading = $ref(true);
 const url = "https://source.unsplash.com/collection/94734566";
 
-const base64 = $ref("");
 const ratio = $ref("1.5");
-function getImage() {
-  axios({
-    methods: "get",
-    responseType: "blob",
-    url,
-  }).then((res) => {
-    let oFileReader = new FileReader();
-    oFileReader.readAsDataURL(res.data);
-    oFileReader.onloadend = function (e) {
-      const image = new Image();
-      base64 = e.target.result;
-      image.src = base64;
-      image.onload = () => {
-        ratio = (image.width / image.height).toFixed(1);
-        console.log((image.width / image.height).toFixed(1));
-      };
-      setData();
-      loading = false;
-    };
-  });
+async function getData() {
+  const image = new Image();
+  if (!base64.value) await getImage();
+
+  setData();
+  image.src = base64.value;
+  image.onload = () => {
+    ratio = (image.width / image.height).toFixed(1);
+    console.log((image.width / image.height).toFixed(1));
+  };
+  loading = false;
 }
-getImage();
-
-useStorage("playName", name);
-
-type Block = {
-  url: string;
-  x: number;
-  y: number;
-  pos: number;
-};
+getData();
 
 start.value = Date.now();
 
 async function setData() {
-  array.value = await initData(n.value, base64);
+  array.value = await initData(n.value, base64.value);
   isFresh();
 }
 
-async function movepic(block: Block) {
+async function movepic(block: PictureBlock) {
   if (!block || block.url === emptyFlag) return;
   console.log(array.value);
   if (canMove(block)) {
@@ -188,33 +170,31 @@ defineExpose({
 </script>
 
 <template>
-  <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
-    <div v-for="(row, y) in array" :key="y" flex="~" items-center justify-center w-max ma>
-      <img
-        object-fill
-        v-if="row.length"
-        v-for="block in row"
-        w-auto
-        flex="~"
-        items-center
-        justify-center
-        border-box
-        :title="block.pos"
-        m="1px"
-        border="0.5 gray-400/10"
-        :class="[
-          'bg-gray-500/10',
-          'hover:bg-gray-500/20',
-          block?.animateY ? 'animate-shake-y' : '',
-          block?.animateX ? 'animate-shake-x' : '',
-        ]"
-        :src="block?.url"
-        @click="movepic(block)"
-        :style="sizeStyle()"
-      />
-    </div>
-    <img w-20 absolute right-1 top-15 border-rd-2 :src="base64" alt="" />
+  <div v-for="(row, y) in array" :key="y" flex="~" items-center justify-center w-max ma>
+    <img
+      object-fill
+      v-if="row.length"
+      v-for="block in row"
+      w-auto
+      flex="~"
+      items-center
+      justify-center
+      border-box
+      :title="block.pos"
+      m="1px"
+      border="0.5 gray-400/10"
+      :class="[
+        'bg-gray-500/10',
+        'hover:bg-gray-500/20',
+        block?.animateY ? 'animate-shake-y' : '',
+        block?.animateX ? 'animate-shake-x' : '',
+      ]"
+      :src="block?.url"
+      @click="movepic(block)"
+      :style="sizeStyle()"
+    />
   </div>
+  <img w-20 absolute right-1 top-15 border-rd-2 :src="base64" alt="" />
 
   <Loading v-if="loading" />
 </template>

@@ -7,3 +7,5 @@ export const rankList = ref<any[]>([])
 export const n = ref<number>(3)
 export const model = ref<string>('number')
 export const array = ref<any[]>([])
+export const base64 = ref("");
+

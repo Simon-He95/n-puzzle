@@ -232,7 +232,7 @@ async function getRank() {
       <button btn @click="newGame('Hard')">Hard</button>
       <button btn @click="newGame('Evil')">Evil</button>
     </div>
-    <div w-full overflow-auto :style="{ 'pointer-events': win.value ? 'none' : '' }">
+    <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
       <Number
         v-if="model === 'number'"
         :countDown="countDown"
