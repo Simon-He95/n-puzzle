@@ -82,7 +82,7 @@ async function getRank() {
 
 <template>
   <information :show="changeName" :close="change"></information>
-  <div flex="~" justify-between box-border p-4>
+  <div flex="~" justify-between box-border m-4 border-b-1 class="border-gray:500/10">
     <div
       w-30
       text-left
@@ -165,8 +165,9 @@ async function getRank() {
         preserveAspectRatio="xMidYMid meet"
         viewBox="0 0 24 24"
         absolute
-        right-1
-        top-1
+        right-2
+        top-2
+        text-xl
         @click="showRank = !showRank"
       >
         <path
@@ -242,7 +243,7 @@ async function getRank() {
       <button btn @click="newGame('Hard')">Hard</button>
       <button btn @click="newGame('Evil')" v-show="model === 'number'">Evil</button>
     </div>
-    <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
+    <div w-full overflow-hidden :style="{ 'pointer-events': win ? 'none' : '' }">
       <Number v-if="model === 'number'" :countDown="countDown"></Number>
       <Picture v-if="model === 'picture'" :countDown="countDown"></Picture>
     </div>

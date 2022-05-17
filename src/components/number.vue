@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { GameStaus, NumberBlock } from "../type";
+import { isDark } from "~/composables";
 import {
   win,
   steps,
@@ -12,6 +13,7 @@ import {
   isFresh,
   initData,
   status,
+  nightMode,
 } from "../config";
 import { updateRank } from "../request";
 
@@ -19,6 +21,7 @@ let { countDown } = defineProps<{
   countDown: number;
 }>();
 const emptyFlag = 0;
+const currentPos = $ref("");
 initData();
 
 async function move(block: NumberBlock) {
@@ -121,6 +124,16 @@ function sizeStyle() {
   }
   return result;
 }
+
+let timer = null;
+function openBlock(block: NumberBlock) {
+  currentPos = block.number;
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    move(block);
+    currentPos = "";
+  }, 500);
+}
 </script>
 
 <template>
@@ -132,6 +145,7 @@ function sizeStyle() {
     justify-center
     w-max
     ma
+    relative
   >
     <div
       v-for="block in row"
@@ -143,15 +157,44 @@ function sizeStyle() {
       border="0.5 gray-400/10"
       class="bg-gray-500/10 hover:bg-gray-500/20"
       @click.prevent="move(block)"
+      relative
       :style="sizeStyle()"
       :class="[
         block?.animateY ? 'animate-shake-y' : '',
         block?.animateX ? 'animate-shake-x' : '',
       ]"
     >
-      {{ block.number === 0 ? "" : block.number }}
+      {{ block.number === emptyFlag ? "" : block.number }}
+      <div
+        v-show="block.number !== emptyFlag && nightMode"
+        @click.stop="openBlock(block)"
+        absolute
+        :class="[
+          currentPos === block.number && 'animate',
+          'w-100%',
+          'h-100%',
+          isDark ? 'bg-white' : 'bg-dark-400',
+        ]"
+        z-50
+        left-0
+        top-0
+      ></div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@keyframes slide {
+  from {
+    transform: rotateX(0);
+  }
+  to {
+    visibility: hidden;
+    transform: rotateX(-180deg);
+  }
+}
+.animate {
+  transform-origin: top;
+  animation: slide 0.5s linear;
+}
+</style>

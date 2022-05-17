@@ -12,6 +12,7 @@ import {
   ratio,
   preview,
   status,
+  nightMode,
 } from "../config";
 import { updateRank, setData } from "../request";
 import { PictureBlock } from "../type";
@@ -20,11 +21,13 @@ import axios from "axios";
 let { countDown } = defineProps<{
   countDown: number;
 }>();
+const currentPos = $ref("");
+
+nightMode.value = false;
 n.value = 3;
 status.value = "Easy";
 setData();
-const url = "https://source.unsplash.com/collection/94734566";
-
+const mode = $ref("normal");
 start.value = Date.now();
 
 async function movepic(block: PictureBlock) {
@@ -107,6 +110,14 @@ function canMove(block: Block): Boolean {
   return false;
 }
 
+function modelChange() {
+  if (mode === "cheat") {
+    mode = "normal";
+  } else {
+    mode = "cheat";
+  }
+}
+
 const sizeStyle = $computed(() => {
   const result = {};
   if (status.value === "Easy") {
@@ -125,6 +136,17 @@ const sizeStyle = $computed(() => {
   result["aspect-ratio"] = ratio.value;
   return result;
 });
+
+let timer = null;
+function openBlock(block: PictureBlock) {
+  if (!nightMode.value) return;
+  currentPos = block.pos;
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    movepic(block);
+    currentPos = "";
+  }, 500);
+}
 </script>
 
 <template>
@@ -137,28 +159,48 @@ const sizeStyle = $computed(() => {
     w-max
     ma
   >
-    <img
-      object-fill
-      v-if="row.length"
-      v-for="block in row"
-      w-auto
-      flex="~"
-      items-center
-      justify-center
-      border-box
-      :title="block.pos"
-      m="1px"
-      border="0.5 gray-400/10"
-      :class="[
-        'bg-gray-500/10',
-        'hover:bg-gray-500/20',
-        block?.animateY ? 'animate-shake-y' : '',
-        block?.animateX ? 'animate-shake-x' : '',
-      ]"
-      :src="block?.url"
-      @click="movepic(block)"
-      :style="sizeStyle"
-    />
+    <div v-for="block in row" relative m="1px">
+      <img
+        object-fill
+        w-auto
+        flex="~"
+        items-center
+        justify-center
+        border-box
+        :title="block.pos"
+        border="0.5 gray-400/10"
+        :class="[
+          'bg-gray-500/10',
+          'hover:bg-gray-500/20',
+          block?.animateY ? 'animate-shake-y' : '',
+          block?.animateX ? 'animate-shake-x' : '',
+        ]"
+        :src="block?.url"
+        @click="movepic(block)"
+        :style="sizeStyle"
+      />
+      <div
+        v-show="block.pos !== emptyFlag && nightMode"
+        @click="openBlock(block)"
+        absolute
+        :class="[currentPos === block.pos && 'animate', 'w-100%', 'h-100%']"
+        z-10
+        left-0
+        top-0
+        bg-dark
+      ></div>
+      <div
+        @click="openBlock(block)"
+        absolute
+        class="left-50% top-50% translate--50%"
+        v-show="mode === 'cheat'"
+        text-2xl
+        font-bold
+        z-20
+      >
+        {{ block.pos === emptyFlag ? "" : block.pos }}
+      </div>
+    </div>
   </div>
   <img
     :class="preview ? 'h-62 top-0 left-50% translate-x--50%' : 'w-20 top-15 right-1'"
@@ -168,8 +210,22 @@ const sizeStyle = $computed(() => {
     alt="原图"
     @click="preview = !preview"
   />
-
+  <button btn @click="modelChange" m-t-5>Cheat Model</button>
   <Loading v-if="loading" />
 </template>
 
-<style scoped></style>
+<style scoped>
+@keyframes slide {
+  from {
+    transform: rotateX(0);
+  }
+  to {
+    visibility: hidden;
+    transform: rotateX(-180deg);
+  }
+}
+.animate {
+  transform-origin: top;
+  animation: slide 0.5s linear;
+}
+</style>
