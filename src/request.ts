@@ -1,5 +1,5 @@
 import axios from "axios";
-import { base64, n, arrayPic, picReset, ratio, loading } from "./config";
+import { base64, n, arrayPic, picReset, ratio, loading, currentImage } from "./config";
 import { randomNumbers, initData } from './pic'
 
 const baseUrl = "http://81.68.90.128:5001/rank?";
@@ -35,9 +35,12 @@ export function getImage() {
   })
 }
 
+const imageLength = 19
 export function baseImage() {
-  return new Promise((resolve, reject) => {
-    const src = `${localUrl}${Math.floor(Math.random() * 19) + 1}.jpg`
+  return new Promise((resolve) => {
+    const picId = picIndex()
+    const src = `${localUrl}${picId}.jpg`
+    currentImage.value = picId
     const image = new Image();
     image.src = src;
     const canvas = document.createElement('canvas');
@@ -49,6 +52,14 @@ export function baseImage() {
       dealPicture(canvas.toDataURL(), resolve)
     }
   })
+}
+
+function picIndex(): number {
+  const id = Math.floor(Math.random() * imageLength) + 1
+  if (id === currentImage.value) {
+    return picIndex()
+  }
+  return id
 }
 
 

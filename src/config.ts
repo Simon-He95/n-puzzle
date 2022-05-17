@@ -13,6 +13,7 @@ export const base64 = ref("");
 export const loading = ref(true)
 export const ratio = ref('1.5')
 export const preview = ref(false);
+export const currentImage = ref(0)
 
 
 
