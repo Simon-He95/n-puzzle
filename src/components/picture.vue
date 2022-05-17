@@ -11,18 +11,18 @@ import {
   loading,
   ratio,
   preview,
+  status,
 } from "../config";
-import { updateRank } from "../request";
+import { updateRank, setData } from "../request";
 import { PictureBlock } from "../type";
 import axios from "axios";
 
-let { status, countDown } = defineProps<{
-  status: GameStaus;
+let { countDown } = defineProps<{
   countDown: number;
 }>();
-
 n.value = 3;
-
+status.value = "Easy";
+setData();
 const url = "https://source.unsplash.com/collection/94734566";
 
 start.value = Date.now();
@@ -34,7 +34,7 @@ async function movepic(block: PictureBlock) {
     // 判断胜利条件
     if (isWin()) {
       win.value = true;
-      updateRank(countDown, steps.value, name.value, status).then(
+      updateRank(countDown, steps.value, name.value, status.value).then(
         (result) => (rankList = result)
       );
       alert(
@@ -107,24 +107,24 @@ function canMove(block: Block): Boolean {
   return false;
 }
 
-function sizeStyle() {
+const sizeStyle = $computed(() => {
   const result = {};
-  if (status === "Easy") {
+  if (status.value === "Easy") {
     result["width"] = "7rem !important";
     result["height"] = "auto !important";
-  } else if (status === "Medium") {
+  } else if (status.value === "Medium") {
     result["width"] = "4.4rem !important";
     result["height"] = "auto !important";
-  } else if (status === "Hard") {
+  } else if (status.value === "Hard") {
     result["width"] = "3.6rem !important";
     result["height"] = "auto !important";
-  } else if (status === "Evil") {
+  } else if (status.value === "Evil") {
     result["width"] = "2.75rem !important";
     result["height"] = "auto !important";
   }
   result["aspect-ratio"] = ratio.value;
   return result;
-}
+});
 </script>
 
 <template>
@@ -157,7 +157,7 @@ function sizeStyle() {
       ]"
       :src="block?.url"
       @click="movepic(block)"
-      :style="sizeStyle()"
+      :style="sizeStyle"
     />
   </div>
   <img

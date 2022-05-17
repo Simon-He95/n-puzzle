@@ -11,6 +11,7 @@ import {
   picReset,
   numReset,
   preview,
+  status,
 } from "../config";
 import { isDark } from "~/composables";
 import { GameStaus } from "../type";
@@ -37,9 +38,8 @@ const pictures = ref(null);
 const now = $(useNow());
 const countDown = $computed(() => Math.round((+now - start.value) / 1000));
 
-const status = $ref("Easy");
 function newGame(difficulty: GameStaus) {
-  status = difficulty;
+  status.value = difficulty;
   switch (difficulty) {
     case "Easy":
       if (n.value !== 3) {
@@ -76,7 +76,7 @@ async function changePicture() {
 
 async function getRank() {
   showRank = !showRank;
-  rankList.value = await initRank(status);
+  rankList.value = await initRank(status.value);
 }
 </script>
 
@@ -243,12 +243,8 @@ async function getRank() {
       <button btn @click="newGame('Evil')" v-show="model === 'number'">Evil</button>
     </div>
     <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
-      <Number v-if="model === 'number'" :countDown="countDown" :status="status"></Number>
-      <Picture
-        v-if="model === 'picture'"
-        :countDown="countDown"
-        :status="status"
-      ></Picture>
+      <Number v-if="model === 'number'" :countDown="countDown"></Number>
+      <Picture v-if="model === 'picture'" :countDown="countDown"></Picture>
     </div>
   </div>
 </template>

@@ -1,3 +1,4 @@
+import { GameStaus } from './type';
 import { ref } from 'vue'
 import { setData } from './request'
 export const name = ref<string>('')
@@ -14,6 +15,7 @@ export const loading = ref(true)
 export const ratio = ref('1.5')
 export const preview = ref(false);
 export const currentImage = ref(0)
+export const status = ref<GameStaus>('Easy')
 
 
 

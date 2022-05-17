@@ -11,11 +11,11 @@ import {
   numReset,
   isFresh,
   initData,
+  status,
 } from "../config";
 import { updateRank } from "../request";
 
-let { status, countDown } = defineProps<{
-  status: GameStaus;
+let { countDown } = defineProps<{
   countDown: number;
 }>();
 const emptyFlag = 0;
@@ -29,7 +29,7 @@ async function move(block: NumberBlock) {
     // 判断胜利条件
     if (isWin()) {
       win.value = true;
-      rankList.value = await updateRank(countDown, steps.value, name.value, status);
+      rankList.value = await updateRank(countDown, steps.value, name.value, status.value);
 
       alert(
         `Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. `
@@ -106,16 +106,16 @@ function isWin(): Boolean {
 
 function sizeStyle() {
   const result = {};
-  if (status === "Easy") {
+  if (status.value === "Easy") {
     result["min-width"] = "5.75rem";
     result["min-height"] = "5.75rem";
-  } else if (status === "Medium") {
+  } else if (status.value === "Medium") {
     result["min-width"] = "4rem";
     result["min-height"] = "4rem";
-  } else if (status === "Hard") {
+  } else if (status.value === "Hard") {
     result["min-width"] = "3.25rem";
     result["min-height"] = "3.25rem";
-  } else if (status === "Evil") {
+  } else if (status.value === "Evil") {
     result["min-width"] = "2.75rem";
     result["min-height"] = "2.75rem";
   }
