@@ -19,8 +19,9 @@ function closeShow() {
     border-1
     border-rd-1
     bg-dark-400
-    absolute
+    fixed
     z-15
+    top-0
     w-full
     h-full
     flex="~"
