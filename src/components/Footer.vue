@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { isDark, toggleDark } from "~/composables";
-import { model } from "../config";
+import { model, preview } from "../config";
 function changeModel() {
+  preview.value = false;
   if (model.value === "number") {
     model.value = "picture";
   } else {

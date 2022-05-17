@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getImage } from "./request";
-getImage();
+import { baseImage } from "./request";
+baseImage();
 </script>
 
 <style scoped></style>

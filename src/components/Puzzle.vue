@@ -1,9 +1,20 @@
 <script setup lang="ts">
-import { name, steps, win, start, rankList, n, model } from "../config";
+import {
+  name,
+  steps,
+  win,
+  start,
+  rankList,
+  n,
+  model,
+  loading,
+  picReset,
+  numReset,
+  preview,
+} from "../config";
 import { isDark } from "~/composables";
 import { GameStaus } from "../type";
-import { initRank } from "../request.ts";
-
+import { initRank, baseImage } from "../request";
 useStorage("playName", name);
 
 let changeName = $ref(true);
@@ -17,25 +28,12 @@ function change() {
   start.value = Date.now();
 }
 const showRank = $ref(false);
-const numbersRest = $ref<Function>();
-const picturesRest = $ref<Function>();
 function reset() {
-  model.value === "number" ? numbersRest() : picturesRest();
+  model.value === "number" ? numReset() : picReset();
 }
 const numbers = ref(null);
 const pictures = ref(null);
 
-onMounted(() => {
-  numbersRest = numbers?.value?.reset;
-  picturesRest = pictures?.value?.reset;
-});
-
-watch(model, async (newVal) => {
-  if (model.value === "picture") {
-    await nextTick();
-    picturesRest = pictures?.value?.reset;
-  }
-});
 const now = $(useNow());
 const countDown = $computed(() => Math.round((+now - start.value) / 1000));
 
@@ -68,6 +66,12 @@ function newGame(difficulty: GameStaus) {
       }
       return;
   }
+}
+
+async function changePicture() {
+  loading.value = true;
+  await baseImage();
+  loading.value = false;
 }
 
 async function getRank() {
@@ -196,7 +200,12 @@ async function getRank() {
       </div>
     </div>
   </div>
-  <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="showRank = false">
+  <div
+    font-sans
+    p="t-10"
+    text="center gray-700 dark:gray-200"
+    @click="(showRank = false) && (preview = false)"
+  >
     <p text-3xl animate-heart-beat m-b-5>
       <vivid-typing :interval="100">N PUZZLE</vivid-typing>
     </p>
@@ -226,24 +235,19 @@ async function getRank() {
     </div>
 
     <div flex="~ gap-1" justify="center" p4>
+      <button btn @click="changePicture()" v-show="model === 'picture'">New Pic</button>
       <button btn @click="reset()">Rest</button>
       <button btn @click="newGame('Easy')">Easy</button>
       <button btn @click="newGame('Medium')">Medium</button>
       <button btn @click="newGame('Hard')">Hard</button>
-      <button btn @click="newGame('Evil')">Evil</button>
+      <button btn @click="newGame('Evil')" v-show="model === 'number'">Evil</button>
     </div>
     <div w-full overflow-auto :style="{ 'pointer-events': win ? 'none' : '' }">
-      <Number
-        v-if="model === 'number'"
-        :countDown="countDown"
-        :status="status"
-        ref="numbers"
-      ></Number>
+      <Number v-if="model === 'number'" :countDown="countDown" :status="status"></Number>
       <Picture
         v-if="model === 'picture'"
         :countDown="countDown"
         :status="status"
-        ref="pictures"
       ></Picture>
     </div>
   </div>

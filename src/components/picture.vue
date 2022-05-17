@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { initData, isWin, emptyFlag, randomNumbers } from "../pic";
-import { steps, win, n, start, array, name, base64 } from "../config";
-import { updateRank, getImage } from "../request";
+import { initData, isWin, emptyFlag } from "../pic";
+import {
+  steps,
+  win,
+  n,
+  start,
+  arrayPic,
+  name,
+  base64,
+  loading,
+  ratio,
+  preview,
+} from "../config";
+import { updateRank } from "../request";
 import { PictureBlock } from "../type";
 import axios from "axios";
 
@@ -10,34 +21,14 @@ let { status, countDown } = defineProps<{
   countDown: number;
 }>();
 
-let loading = $ref(true);
+n.value = 3;
+
 const url = "https://source.unsplash.com/collection/94734566";
-
-const ratio = $ref("1.5");
-async function getData() {
-  const image = new Image();
-  if (!base64.value) await getImage();
-
-  setData();
-  image.src = base64.value;
-  image.onload = () => {
-    ratio = (image.width / image.height).toFixed(1);
-    console.log((image.width / image.height).toFixed(1));
-  };
-  loading = false;
-}
-getData();
 
 start.value = Date.now();
 
-async function setData() {
-  array.value = await initData(n.value, base64.value);
-  isFresh();
-}
-
 async function movepic(block: PictureBlock) {
   if (!block || block.url === emptyFlag) return;
-  console.log(array.value);
   if (canMove(block)) {
     steps.value++;
     // 判断胜利条件
@@ -57,120 +48,95 @@ async function movepic(block: PictureBlock) {
 
 function canMove(block: Block): Boolean {
   const { x, y, url, pos } = block;
-  if (y > 0 && array.value[y - 1][x].url === emptyFlag) {
-    const { url: tempUrl, pos: temPos } = array.value[y - 1][x];
-    array.value[y - 1][x].url = url;
-    array.value[y - 1][x].pos = pos;
-    array.value[y][x].url = tempUrl;
-    array.value[y][x].pos = temPos;
-    array.value[y][x].animateY = true;
-    array.value[y - 1][x].animateY = true;
+  if (y > 0 && arrayPic.value[y - 1][x].url === emptyFlag) {
+    const { url: tempUrl, pos: temPos } = arrayPic.value[y - 1][x];
+    arrayPic.value[y - 1][x].url = url;
+    arrayPic.value[y - 1][x].pos = pos;
+    arrayPic.value[y][x].url = tempUrl;
+    arrayPic.value[y][x].pos = temPos;
+    arrayPic.value[y][x].animateY = true;
+    arrayPic.value[y - 1][x].animateY = true;
     setTimeout(() => {
-      array.value[y - 1][x].animateY = false;
-      array.value[y][x].animateY = false;
+      arrayPic.value[y - 1][x].animateY = false;
+      arrayPic.value[y][x].animateY = false;
     }, 50);
     return true;
   }
-  if (y < n.value - 1 && array.value[y + 1][x].url === emptyFlag) {
-    const { url: tempUrl, pos: temPos } = array.value[y + 1][x];
-    array.value[y + 1][x].url = url;
-    array.value[y + 1][x].pos = pos;
-    array.value[y][x].url = tempUrl;
-    array.value[y][x].pos = temPos;
-    array.value[y][x].animateY = true;
-    array.value[y + 1][x].animateY = true;
+  if (y < n.value - 1 && arrayPic.value[y + 1][x].url === emptyFlag) {
+    const { url: tempUrl, pos: temPos } = arrayPic.value[y + 1][x];
+    arrayPic.value[y + 1][x].url = url;
+    arrayPic.value[y + 1][x].pos = pos;
+    arrayPic.value[y][x].url = tempUrl;
+    arrayPic.value[y][x].pos = temPos;
+    arrayPic.value[y][x].animateY = true;
+    arrayPic.value[y + 1][x].animateY = true;
     setTimeout(() => {
-      array.value[y + 1][x].animateY = false;
-      array.value[y][x].animateY = false;
+      arrayPic.value[y + 1][x].animateY = false;
+      arrayPic.value[y][x].animateY = false;
     }, 50);
     return true;
   }
-  if (x > 0 && array.value[y][x - 1].url === emptyFlag) {
-    const { url: tempUrl, pos: temPos } = array.value[y][x - 1];
-    array.value[y][x - 1].url = url;
-    array.value[y][x - 1].pos = pos;
-    array.value[y][x].url = tempUrl;
-    array.value[y][x].pos = temPos;
-    array.value[y][x].animateX = true;
-    array.value[y][x - 1].animateX = true;
+  if (x > 0 && arrayPic.value[y][x - 1].url === emptyFlag) {
+    const { url: tempUrl, pos: temPos } = arrayPic.value[y][x - 1];
+    arrayPic.value[y][x - 1].url = url;
+    arrayPic.value[y][x - 1].pos = pos;
+    arrayPic.value[y][x].url = tempUrl;
+    arrayPic.value[y][x].pos = temPos;
+    arrayPic.value[y][x].animateX = true;
+    arrayPic.value[y][x - 1].animateX = true;
     setTimeout(() => {
-      array.value[y][x - 1].animateX = false;
-      array.value[y][x].animateX = false;
+      arrayPic.value[y][x - 1].animateX = false;
+      arrayPic.value[y][x].animateX = false;
     }, 50);
     return true;
   }
-  if (x < n.value - 1 && array.value[y][x + 1].url === emptyFlag) {
-    const { url: tempUrl, pos: temPos } = array.value[y][x + 1];
-    array.value[y][x + 1].url = url;
-    array.value[y][x + 1].pos = pos;
-    array.value[y][x].url = tempUrl;
-    array.value[y][x].pos = temPos;
-    array.value[y][x].animateX = true;
-    array.value[y][x + 1].animateX = true;
+  if (x < n.value - 1 && arrayPic.value[y][x + 1].url === emptyFlag) {
+    const { url: tempUrl, pos: temPos } = arrayPic.value[y][x + 1];
+    arrayPic.value[y][x + 1].url = url;
+    arrayPic.value[y][x + 1].pos = pos;
+    arrayPic.value[y][x].url = tempUrl;
+    arrayPic.value[y][x].pos = temPos;
+    arrayPic.value[y][x].animateX = true;
+    arrayPic.value[y][x + 1].animateX = true;
     setTimeout(() => {
-      array.value[y][x + 1].animateX = false;
-      array.value[y][x].animateX = false;
+      arrayPic.value[y][x + 1].animateX = false;
+      arrayPic.value[y][x].animateX = false;
     }, 50);
     return true;
   }
   return false;
 }
 
-// 判断此题是否有解
-function isFresh() {
-  let inverse = 0;
-  const preNumber: number[] = [];
-  const odd = (n.value & 1) === 1;
-  randomNumbers.reduce((pre, cur) => {
-    preNumber.push(pre);
-    preNumber.forEach((item) => {
-      if (item > cur) inverse++;
-    });
-    return cur;
-  }, 0);
-  randomNumbers.length = 0;
-  if (odd && (inverse & 1) === 1) {
-    // 无解重新生成
-    reset();
-  } else if (!odd && (inverse & 1) === 0) {
-    // 无解重新生成
-    reset();
-  }
-}
-
-async function reset() {
-  win.value = false;
-  start.value = Date.now();
-  steps.value = 0;
-  setData();
-}
-
 function sizeStyle() {
   const result = {};
   if (status === "Easy") {
-    result["width"] = "5.75rem !important";
+    result["width"] = "7rem !important";
     result["height"] = "auto !important";
   } else if (status === "Medium") {
-    result["width"] = "4rem !important";
+    result["width"] = "4.4rem !important";
     result["height"] = "auto !important";
   } else if (status === "Hard") {
-    result["width"] = "3.25rem !important";
+    result["width"] = "3.6rem !important";
     result["height"] = "auto !important";
   } else if (status === "Evil") {
     result["width"] = "2.75rem !important";
     result["height"] = "auto !important";
   }
-  result["aspect-ratio"] = ratio;
+  result["aspect-ratio"] = ratio.value;
   return result;
 }
-
-defineExpose({
-  reset,
-});
 </script>
 
 <template>
-  <div v-for="(row, y) in array" :key="y" flex="~" items-center justify-center w-max ma>
+  <div
+    v-for="(row, y) in arrayPic"
+    :key="y"
+    flex="~"
+    items-center
+    justify-center
+    w-max
+    ma
+  >
     <img
       object-fill
       v-if="row.length"
@@ -194,7 +160,14 @@ defineExpose({
       :style="sizeStyle()"
     />
   </div>
-  <img w-20 absolute right-1 top-15 border-rd-2 :src="base64" alt="" />
+  <img
+    :class="preview ? 'h-62 top-0 left-50% translate-x--50%' : 'w-20 top-15 right-1'"
+    absolute
+    border-rd-2
+    :src="base64"
+    alt="原图"
+    @click="preview = !preview"
+  />
 
   <Loading v-if="loading" />
 </template>

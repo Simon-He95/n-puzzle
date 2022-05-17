@@ -15,6 +15,7 @@ app.all("*", function (req, res, next) {
     next();
   }
 })
+
 app.get('/rank', (req, res) => {
   const { times, steps, name, status, type } = req.query
   if (type === 'init') {
@@ -55,7 +56,6 @@ app.get('/rank', (req, res) => {
   }
   res.json(json[status])
 })
-
 
 app.listen(5001, () => {
   console.log('服务器启动5001')

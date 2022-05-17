@@ -1,5 +1,5 @@
 const collect: any[] = []
-import { array, n } from './config'
+import { arrayPic, n } from './config'
 export const randomNumbers: number[] = []
 
 export const emptyFlag = "./empty.png";
@@ -92,30 +92,30 @@ function randomPic(numbers: any[]) {
   return result
 }
 export async function initData(n: number, src: string) {
-  const { result: array, numbers } = await splitImage(n, src) as any
+  const { result: arrayPic, numbers } = await splitImage(n, src) as any
   const copyNumbers = JSON.parse(JSON.stringify(numbers))
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
+  for (let i = 0; i < arrayPic.length; i++) {
+    for (let j = 0; j < arrayPic[i].length; j++) {
       if (i === 0 && j === 0) {
-        array[i][j].url = emptyFlag
-        array[i][j].pos = emptyFlag
-        array[i][j].animateX = false
-        array[i][j].animateY = false
+        arrayPic[i][j].url = emptyFlag
+        arrayPic[i][j].pos = emptyFlag
+        arrayPic[i][j].animateX = false
+        arrayPic[i][j].animateY = false
         continue
       }
       const { url, pos, } = randomPic(copyNumbers)
       randomNumbers.push(pos)
-      array[i][j].url = url
-      array[i][j].pos = pos
-      array[i][j].animateX = false
-      array[i][j].animateY = false
+      arrayPic[i][j].url = url
+      arrayPic[i][j].pos = pos
+      arrayPic[i][j].animateX = false
+      arrayPic[i][j].animateY = false
     }
   }
-  return array
+  return arrayPic
 }
 
 export function isWin(): boolean {
-  return array.value.every((row) => {
+  return arrayPic.value.every((row) => {
     return row.every((item: any) => {
       if (item.x === n.value - 1 && item.y === n.value - 1 && item.pos === emptyFlag) {
         return true;
@@ -124,3 +124,5 @@ export function isWin(): boolean {
     });
   });
 }
+
+
