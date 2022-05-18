@@ -139,9 +139,13 @@ const sizeStyle = $computed(() => {
 
 let timer = null;
 function openBlock(block: PictureBlock) {
-  if (!nightMode.value) return;
+  if (!nightMode.value) {
+    movepic(block);
+    return;
+  }
   currentPos = block.pos;
   clearTimeout(timer);
+  console.log("22");
   timer = setTimeout(() => {
     movepic(block);
     currentPos = "";
