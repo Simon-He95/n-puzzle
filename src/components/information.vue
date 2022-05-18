@@ -7,7 +7,7 @@ import { name } from "../config";
 
 function closeShow() {
   if (!name.value) {
-    alert("请输入姓名");
+    alert("please input your name");
   } else {
     close();
   }
@@ -66,7 +66,7 @@ function closeShow() {
 <style scoped>
 .information:before {
   content: "";
-  background-image: url("/cover.png");
+  background-image: url("../cover.png");
   opacity: 0.2;
   z-index: -1;
   position: absolute;
