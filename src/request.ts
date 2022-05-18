@@ -2,7 +2,8 @@ import axios from "axios";
 import { base64, n, arrayPic, picReset, ratio, loading, currentImage } from "./config";
 import { randomNumbers, initData } from './pic'
 
-const baseUrl = "http://81.68.90.128:5001/rank?";
+// http://api.n-puzzle.hejian.club/rank?type=init&status=Easy
+const baseUrl = "http://api.n-puzzle.hejian.club/rank?";
 // const baseUrl = "http://localhost:5001/rank?";
 const localUrl = "./img/"
 

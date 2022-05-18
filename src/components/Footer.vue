@@ -12,7 +12,7 @@ function changeModel() {
 </script>
 
 <template>
-  <nav text-xl p-y-10 inline-flex gap-2 items-center w-full justify-evenly>
+  <nav text-xl p-y-10 inline-flex gap-12 items-center>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
