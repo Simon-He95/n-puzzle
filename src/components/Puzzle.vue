@@ -177,9 +177,11 @@ async function getRank() {
         />
       </svg>
       <div m-y-4 text-2xl>
-        <vivid-typing :interval="100" :infinity="true"
-          >{{ status }}-Model Ranking</vivid-typing
-        >
+        <vivid-typing
+          :interval="100"
+          :infinity="true"
+          :content="status + '-Model Ranking'"
+        ></vivid-typing>
       </div>
       <div p-y-1>
         <div
@@ -208,7 +210,7 @@ async function getRank() {
     @click="(showRank = false) && (preview = false)"
   >
     <p text-3xl animate-heart-beat m-b-5>
-      <vivid-typing :interval="100">N PUZZLE</vivid-typing>
+      <vivid-typing :interval="100" content="N PUZZLE"></vivid-typing>
     </p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>

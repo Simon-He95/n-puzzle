@@ -20,7 +20,7 @@ specifiers:
   vite: ^2.8.6
   vite-plugin-pages: ^0.22.0
   vitest: ^0.7.0
-  vivid-typing: ^0.0.3
+  vivid-typing: 1.0.2
   vue: ^3.2.31
   vue-router: ^4.0.14
   vue-tsc: ^0.33.2
@@ -49,7 +49,7 @@ devDependencies:
   vite: 2.8.6
   vite-plugin-pages: 0.22.0_vite@2.8.6
   vitest: 0.7.0_jsdom@19.0.0
-  vivid-typing: 0.0.3
+  vivid-typing: 1.0.2
   vue-tsc: 0.33.2_typescript@4.6.2
 
 packages:
@@ -4105,8 +4105,8 @@ packages:
       - stylus
     dev: true
 
-  /vivid-typing/0.0.3:
-    resolution: {integrity: sha512-WdghSVOX9s2nKjjER7bsXabjEvtGvDBJ8ZAK4ZNTKC2hxFR+roayVPt1RfFkQ8K3jd5PZ6GRT212CeUk2ws8Qw==}
+  /vivid-typing/1.0.2:
+    resolution: {integrity: sha512-+LQbqLGMOFfrBYdVyYVgPO+KWP3CrGzOOocE5hdlBi7wHl0arpM0VncBt84WdaKq2vJRQJuWKsHcAdG2J+Xigw==}
     dependencies:
       '@vueuse/core': 8.1.1_vue@3.2.31
       vue: 3.2.31
