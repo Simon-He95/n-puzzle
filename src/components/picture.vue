@@ -24,6 +24,7 @@ let { countDown } = defineProps<{
 const currentPos = $ref("");
 
 nightMode.value = false;
+win.value = false;
 n.value = 3;
 status.value = "Easy";
 setData();
