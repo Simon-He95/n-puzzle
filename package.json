@@ -1,6 +1,7 @@
 {
   "name": "n-puzzle",
   "version": "0.0.1",
+  "packageManager": "pnpm@6.32.3",
   "description": "N-Puzzle Game",
   "keywords": [
     "puzzle",
@@ -8,18 +9,19 @@
     "picture",
     "game"
   ],
-  "files": [
-    "dist"
-  ],
   "author": "Simon He",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Simon-He95/n-puzzle.git"
   },
-  "packageManager": "pnpm@6.32.3",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
-    "dev": "vite --port 8080 --open",
+    "dev": "runall \"pnpm start\" \"pnpm serve\" --parallel",
+    "start": "vite --port 8080 --open",
+    "serve": "node ./server/index.js",
     "lint": "eslint .",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
@@ -33,11 +35,13 @@
   "devDependencies": {
     "@antfu/eslint-config": "^0.18.8",
     "@iconify-json/carbon": "^1.1.2",
+    "@simon_he/runall": "^0.0.2",
     "@types/node": "^17.0.21",
     "@unocss/reset": "^0.29.2",
     "@vitejs/plugin-vue": "^2.2.4",
     "@vue/test-utils": "^2.0.0-rc.18",
     "eslint": "^8.11.0",
+    "express": "^4.18.2",
     "jsdom": "^19.0.0",
     "pnpm": "^6.32.3",
     "typescript": "^4.6.2",
@@ -47,6 +51,7 @@
     "vite": "^2.8.6",
     "vite-plugin-pages": "^0.22.0",
     "vitest": "^0.7.0",
+    "vivid-typing": "^1.1.31",
     "vue-tsc": "^0.33.2"
   },
   "eslintConfig": {
