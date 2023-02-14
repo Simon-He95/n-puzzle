@@ -4,7 +4,7 @@ import { initData, randomNumbers } from './pic'
 
 // http://api.n-puzzle.hejian.club/rank?type=init&status=Easy
 // const baseUrl = "http://api.n-puzzle.hejian.club/rank?";
-const baseUrl = 'http://localhost:5001/rank?'
+const baseUrl = 'http://localhost:5002/rank?'
 const localUrl = './img/'
 
 export async function initRank(status: string) {
@@ -24,7 +24,7 @@ export async function updateRank(countDown: number, steps: number, name: string,
 const url = 'https://source.unsplash.com/collection/94734566'
 
 export function getImage() {
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async(resolve, reject) => {
     const { data } = await axios({
       methods: 'get',
       responseType: 'blob',
