@@ -120,11 +120,6 @@ function modelChange() {
     mode.value = 'cheat'
 }
 
-function reset() {
-  win.value = false // 重置游戏完成状态
-  mode.value === 'number' ? numReset() : picReset()
-}
-
 const sizeStyle = computed(() => {
   const result: Record<string, string> = {}
   const availableHeight = window.innerHeight - 500 // 减去顶部内容的高度

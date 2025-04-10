@@ -107,27 +107,16 @@ function isWin(): boolean {
   })
 }
 
-function sizeStyle() {
-  const result = {}
-  if (status.value === 'Easy') {
-    result['min-width'] = '5.75rem'
-    result['min-height'] = '5.75rem'
-  }
-  else if (status.value === 'Medium') {
-    result['min-width'] = '4rem'
-    result['min-height'] = '4rem'
-  }
-  else if (status.value === 'Hard') {
-    result['min-width'] = '3.25rem'
-    result['min-height'] = '3.25rem'
-  }
-  else if (status.value === 'Evil') {
-    result['min-width'] = '2.75rem'
-    result['min-height'] = '2.75rem'
-  }
-  return result
-}
+const sizeStyle = computed(() => {
+  const result: Record<string, string> = {}
+  const availableHeight = window.innerHeight - 500 // 减去顶部内容的高度
+  const baseSize = Math.min(window.innerWidth, availableHeight) / (n.value * 1.1) // 调整尺寸以避免滚动条
 
+  result.width = `${baseSize}px`
+  result.height = `${baseSize}px`
+  result.margin = '2px' // 添加间距以保证美观
+  return result
+})
 let timer = null
 function openBlock(block: NumberBlock) {
   currentPos.value = block.number
@@ -143,7 +132,7 @@ function openBlock(block: NumberBlock) {
   <div v-for="(row, y) in arrayNum" :key="y" flex="~" items-center justify-center w-max ma relative>
     <div
       v-for="block in row" :key="block.number" flex="~" items-center justify-center border-box m="1px"
-      border="0.5 gray-400/10" class="bg-gray-500/10 hover:bg-gray-500/20" relative :style="sizeStyle()" :class="[
+      border="0.5 gray-400/10" class="bg-gray-500/10 hover:bg-gray-500/20" relative :style="sizeStyle" :class="[
         block?.animateY ? 'animate-shake-y' : '',
         block?.animateX ? 'animate-shake-x' : '',
       ]" @click.prevent="move(block)"
