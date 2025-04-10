@@ -35,8 +35,6 @@ function reset() {
   win.value = false
   model.value === 'number' ? numReset() : picReset()
 }
-const numbers = ref(null)
-const pictures = ref(null)
 
 const now = useNow()
 // 添加一个完成时间变量
