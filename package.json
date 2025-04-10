@@ -52,8 +52,5 @@
     "vitest": "^3.1.1",
     "vivid-typing": "^1.1.46",
     "vue-tsc": "^0.33.9"
-  },
-  "eslintConfig": {
-    "extends": "@antfu"
   }
 }
