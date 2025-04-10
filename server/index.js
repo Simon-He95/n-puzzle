@@ -1,6 +1,7 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const express = require('express')
 const json = require('./rank.json')
+
 const app = express()
 app.all('*', (req, res, next) => {
   // 设置允许跨域的域名，*代表允许任意域名跨域

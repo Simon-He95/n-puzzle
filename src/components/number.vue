@@ -1,138 +1,140 @@
 <script setup lang="ts">
-import { GameStaus, NumberBlock } from "../type";
-import { isDark } from "~/composables";
+import type { NumberBlock } from '../type'
+import { isDark } from '~/composables'
 import {
-  win,
-  steps,
-  start,
-  rankList,
-  name,
-  n,
   arrayNum,
-  numReset,
-  isFresh,
   initData,
-  status,
+  n,
+  name,
   nightMode,
-} from "../config";
-import { updateRank } from "../request";
+  rankList,
+  status,
+  steps,
+  win,
+} from '../config'
+import { updateRank } from '../request'
 
-let { countDown } = defineProps<{
-  countDown: number;
-}>();
-const emptyFlag = 0;
-const currentPos = $ref("");
-initData();
+const { countDown } = defineProps<{
+  countDown: number
+}>()
+const emptyFlag = 0
+const currentPos = ref('')
+initData()
 
 async function move(block: NumberBlock) {
   // 判断上下左右是否有空白格
-  if (block.number === 0) return;
+  if (block.number === 0)
+    return
   if (canMove(block)) {
-    steps.value++;
+    steps.value++
     // 判断胜利条件
     if (isWin()) {
-      win.value = true;
-      rankList.value = await updateRank(countDown, steps.value, name.value, status.value);
+      win.value = true
+      rankList.value = await updateRank(countDown, steps.value, name.value, status.value)
 
       alert(
-        `Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. `
-      );
+        'Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. ',
+      )
     }
-  } else {
+  }
+  else {
     // alert("改数字不能被交换");
   }
 }
 
-function canMove(block: NumberBlock): Boolean {
-  const { x, y, number } = block;
+function canMove(block: NumberBlock): boolean {
+  const { x, y, number } = block
   if (y > 0 && arrayNum.value[y - 1][x].number === emptyFlag) {
-    const temp = arrayNum.value[y - 1][x].number;
-    arrayNum.value[y - 1][x].number = number;
-    arrayNum.value[y][x].number = temp;
-    arrayNum.value[y][x].animateY = true;
-    arrayNum.value[y - 1][x].animateY = true;
+    const temp = arrayNum.value[y - 1][x].number
+    arrayNum.value[y - 1][x].number = number
+    arrayNum.value[y][x].number = temp
+    arrayNum.value[y][x].animateY = true
+    arrayNum.value[y - 1][x].animateY = true
     setTimeout(() => {
-      arrayNum.value[y - 1][x].animateY = false;
-      arrayNum.value[y][x].animateY = false;
-    }, 50);
-    return true;
+      arrayNum.value[y - 1][x].animateY = false
+      arrayNum.value[y][x].animateY = false
+    }, 50)
+    return true
   }
   if (y < n.value - 1 && arrayNum.value[y + 1][x].number === emptyFlag) {
-    const temp = arrayNum.value[y + 1][x].number;
-    arrayNum.value[y + 1][x].number = number;
-    arrayNum.value[y][x].number = temp;
-    arrayNum.value[y][x].animateY = true;
-    arrayNum.value[y + 1][x].animateY = true;
+    const temp = arrayNum.value[y + 1][x].number
+    arrayNum.value[y + 1][x].number = number
+    arrayNum.value[y][x].number = temp
+    arrayNum.value[y][x].animateY = true
+    arrayNum.value[y + 1][x].animateY = true
     setTimeout(() => {
-      arrayNum.value[y + 1][x].animateY = false;
-      arrayNum.value[y][x].animateY = false;
-    }, 50);
-    return true;
+      arrayNum.value[y + 1][x].animateY = false
+      arrayNum.value[y][x].animateY = false
+    }, 50)
+    return true
   }
   if (x > 0 && arrayNum.value[y][x - 1].number === emptyFlag) {
-    const temp = arrayNum.value[y][x - 1].number;
-    arrayNum.value[y][x - 1].number = number;
-    arrayNum.value[y][x].number = temp;
-    arrayNum.value[y][x].animateX = true;
-    arrayNum.value[y][x - 1].animateX = true;
+    const temp = arrayNum.value[y][x - 1].number
+    arrayNum.value[y][x - 1].number = number
+    arrayNum.value[y][x].number = temp
+    arrayNum.value[y][x].animateX = true
+    arrayNum.value[y][x - 1].animateX = true
     setTimeout(() => {
-      arrayNum.value[y][x - 1].animateX = false;
-      arrayNum.value[y][x].animateX = false;
-    }, 50);
-    return true;
+      arrayNum.value[y][x - 1].animateX = false
+      arrayNum.value[y][x].animateX = false
+    }, 50)
+    return true
   }
   if (x < n.value - 1 && arrayNum.value[y][x + 1].number === emptyFlag) {
-    const temp = arrayNum.value[y][x + 1].number;
-    arrayNum.value[y][x + 1].number = number;
-    arrayNum.value[y][x].number = temp;
-    arrayNum.value[y][x].animateX = true;
-    arrayNum.value[y][x + 1].animateX = true;
+    const temp = arrayNum.value[y][x + 1].number
+    arrayNum.value[y][x + 1].number = number
+    arrayNum.value[y][x].number = temp
+    arrayNum.value[y][x].animateX = true
+    arrayNum.value[y][x + 1].animateX = true
     setTimeout(() => {
-      arrayNum.value[y][x + 1].animateX = false;
-      arrayNum.value[y][x].animateX = false;
-    }, 50);
-    return true;
+      arrayNum.value[y][x + 1].animateX = false
+      arrayNum.value[y][x].animateX = false
+    }, 50)
+    return true
   }
-  return false;
+  return false
 }
 
-function isWin(): Boolean {
+function isWin(): boolean {
   return arrayNum.value.every((row) => {
     return row.every((item) => {
-      if (item.x === n.value - 1 && item.y === n.value - 1 && item.number === emptyFlag) {
-        return true;
-      }
-      return item.number === item.x + item.y * n.value + 1;
-    });
-  });
+      if (item.x === n.value - 1 && item.y === n.value - 1 && item.number === emptyFlag)
+        return true
+
+      return item.number === item.x + item.y * n.value + 1
+    })
+  })
 }
 
 function sizeStyle() {
-  const result = {};
-  if (status.value === "Easy") {
-    result["min-width"] = "5.75rem";
-    result["min-height"] = "5.75rem";
-  } else if (status.value === "Medium") {
-    result["min-width"] = "4rem";
-    result["min-height"] = "4rem";
-  } else if (status.value === "Hard") {
-    result["min-width"] = "3.25rem";
-    result["min-height"] = "3.25rem";
-  } else if (status.value === "Evil") {
-    result["min-width"] = "2.75rem";
-    result["min-height"] = "2.75rem";
+  const result = {}
+  if (status.value === 'Easy') {
+    result['min-width'] = '5.75rem'
+    result['min-height'] = '5.75rem'
   }
-  return result;
+  else if (status.value === 'Medium') {
+    result['min-width'] = '4rem'
+    result['min-height'] = '4rem'
+  }
+  else if (status.value === 'Hard') {
+    result['min-width'] = '3.25rem'
+    result['min-height'] = '3.25rem'
+  }
+  else if (status.value === 'Evil') {
+    result['min-width'] = '2.75rem'
+    result['min-height'] = '2.75rem'
+  }
+  return result
 }
 
-let timer = null;
+let timer = null
 function openBlock(block: NumberBlock) {
-  currentPos = block.number;
-  clearTimeout(timer);
+  currentPos.value = block.number
+  clearTimeout(timer)
   timer = setTimeout(() => {
-    move(block);
-    currentPos = "";
-  }, 500);
+    move(block)
+    currentPos.value = ''
+  }, 500)
 }
 </script>
 
@@ -149,6 +151,7 @@ function openBlock(block: NumberBlock) {
   >
     <div
       v-for="block in row"
+      :key="block.number"
       flex="~"
       items-center
       justify-center
@@ -156,29 +159,27 @@ function openBlock(block: NumberBlock) {
       m="1px"
       border="0.5 gray-400/10"
       class="bg-gray-500/10 hover:bg-gray-500/20"
-      @click.prevent="move(block)"
       relative
       :style="sizeStyle()"
       :class="[
         block?.animateY ? 'animate-shake-y' : '',
         block?.animateX ? 'animate-shake-x' : '',
       ]"
+      @click.prevent="move(block)"
     >
       {{ block.number === emptyFlag ? "" : block.number }}
       <div
         v-show="block.number !== emptyFlag && nightMode"
-        @click.stop="openBlock(block)"
         absolute
-        :class="[
+        class="w-100% h-100%" :class="[
           currentPos === block.number && 'animate',
-          'w-100%',
-          'h-100%',
           isDark ? 'bg-white' : 'bg-dark-400',
         ]"
         z-50
         left-0
         top-0
-      ></div>
+        @click.stop="openBlock(block)"
+      />
     </div>
   </div>
 </template>

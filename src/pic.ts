@@ -1,52 +1,52 @@
-const collect: any[] = []
 import { arrayPic, n } from './config'
+
+const collect: any[] = []
 export const randomNumbers: number[] = []
 
-export const emptyFlag = "./empty.png";
+export const emptyFlag = './empty.png'
 const pictureMap = new Map<string, any>()
 
 function splitImage(n: number, src: string) {
   const key = `${n}-${src}`
   return new Promise((resolve) => {
-    if (pictureMap.has(key)) {
+    if (pictureMap.has(key))
       return resolve(pictureMap.get(key))
-    }
-    const canvas = document.createElement("canvas");
-    const image = new Image();
-    image.src = src;
-    const ctx = canvas.getContext("2d")!;
+
+    const canvas = document.createElement('canvas')
+    const image = new Image()
+    image.src = src
+    const ctx = canvas.getContext('2d')!
     const numbers: any[] = []
 
     image.onload = async () => {
-      const w = image.width / n;
-      const h = image.height / n;
+      const w = image.width / n
+      const h = image.height / n
       const result: any[] = []
 
       for (let j = 0; j < n; j++) {
-        const col = [];
+        const col = []
         for (let i = 0; i < n; i++) {
-          ctx.drawImage(image, i * w, j * h, w, h, 0, 0, w, h);
-          const url = await PicSpace(canvas.toDataURL("image/png"))
+          ctx.drawImage(image, i * w, j * h, w, h, 0, 0, w, h)
+          const url = await PicSpace(canvas.toDataURL('image/png'))
 
           const result = {
             url,
             x: i,
             y: j,
-            pos: i + j * n
-          };
+            pos: i + j * n,
+          }
           if (j !== 2 || i !== 2) {
             numbers.push(JSON.parse(JSON.stringify(result)))
             collect.push(result)
           }
-          col.push(result);
+          col.push(result)
         }
-        result.push(col);
+        result.push(col)
       }
       pictureMap.set(key, { result, numbers })
       resolve({ result, numbers })
     }
   })
-
 }
 
 async function PicSpace(src: string) {
@@ -55,12 +55,15 @@ async function PicSpace(src: string) {
     img.src = src
     img.onload = () => {
       const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext('2d')!
       canvas.width = img.width
       canvas.height = img.height
-      ctx?.drawImage(img, 0, 0)
-      const imgData = ctx?.getImageData(0, 0, canvas.width, canvas.height).data!
-      let lOffset = canvas.width, rOffset = 0, tOffset = canvas.height, bOffset = 0
+      ctx.drawImage(img, 0, 0)
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data!
+      let lOffset = canvas.width
+      let rOffset = 0
+      let tOffset = canvas.height
+      let bOffset = 0
       for (let i = 0; i < canvas.width; i++) {
         for (let j = 0; j < canvas.height; j++) {
           const pos = (i + canvas.width * j) * 4
@@ -84,11 +87,10 @@ async function PicSpace(src: string) {
       resolve(canvas1.toDataURL())
     }
   })
-
 }
 
 function randomPic(numbers: any[]) {
-  const result = numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0];
+  const result = numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0]
   return result
 }
 export async function initData(n: number, src: string) {
@@ -103,7 +105,7 @@ export async function initData(n: number, src: string) {
         arrayPic[i][j].animateY = false
         continue
       }
-      const { url, pos, } = randomPic(copyNumbers)
+      const { url, pos } = randomPic(copyNumbers)
       randomNumbers.push(pos)
       arrayPic[i][j].url = url
       arrayPic[i][j].pos = pos
@@ -117,12 +119,10 @@ export async function initData(n: number, src: string) {
 export function isWin(): boolean {
   return arrayPic.value.every((row) => {
     return row.every((item: any) => {
-      if (item.x === n.value - 1 && item.y === n.value - 1 && item.pos === emptyFlag) {
-        return true;
-      }
-      return item.pos === item.x + item.y * n.value;
-    });
-  });
+      if (item.x === n.value - 1 && item.y === n.value - 1 && item.pos === emptyFlag)
+        return true
+
+      return item.pos === item.x + item.y * n.value
+    })
+  })
 }
-
-

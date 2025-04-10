@@ -23,16 +23,16 @@ export async function updateRank(countDown: number, steps: number, name: string,
 
 const url = 'https://source.unsplash.com/collection/94734566'
 
-export function getImage() {
-  return new Promise(async(resolve, reject) => {
-    const { data } = await axios({
-      methods: 'get',
-      responseType: 'blob',
-      url,
-    })
-    const oFileReader = new FileReader()
-    oFileReader.readAsDataURL(data)
-    oFileReader.onloadend = e => dealPicture(e?.target?.result as any, resolve)
+export async function getImage() {
+  const { data } = await axios({
+    methods: 'get',
+    responseType: 'blob',
+    url,
+  })
+  const oFileReader = new FileReader()
+  oFileReader.readAsDataURL(data)
+  return new Promise((resolve) => {
+    oFileReader.onload = e => dealPicture(e?.target?.result as any, resolve)
   })
 }
 
@@ -85,7 +85,8 @@ function isFresh() {
   randomNumbers.reduce((pre, cur) => {
     preNumber.push(pre)
     preNumber.forEach((item) => {
-      if (item > cur) inverse++
+      if (item > cur)
+        inverse++
     })
     return cur
   }, 0)

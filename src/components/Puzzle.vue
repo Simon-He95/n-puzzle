@@ -1,87 +1,87 @@
 <script setup lang="ts">
+import type { GameStaus } from '../type'
+import { isDark } from '~/composables'
 import {
+  loading,
+  model,
+  n,
   name,
+  numReset,
+  picReset,
+  preview,
+  rankList,
+  start,
+  status,
   steps,
   win,
-  start,
-  rankList,
-  n,
-  model,
-  loading,
-  picReset,
-  numReset,
-  preview,
-  status,
-} from "../config";
-import { isDark } from "~/composables";
-import { GameStaus } from "../type";
-import { initRank, baseImage } from "../request";
-useStorage("playName", name);
+} from '../config'
+import { baseImage, initRank } from '../request'
 
-let changeName = $ref(true);
-if (name.value) {
-  changeName = false;
-}
-start.value = Date.now();
+useStorage('playName', name)
+
+const changeName = ref(true)
+if (name.value)
+  changeName.value = false
+
+start.value = Date.now()
 
 function change() {
-  changeName = false;
-  start.value = Date.now();
+  changeName.value = false
+  start.value = Date.now()
 }
-const showRank = $ref(false);
+const showRank = ref(false)
 function reset() {
-  model.value === "number" ? numReset() : picReset();
+  model.value === 'number' ? numReset() : picReset()
 }
-const numbers = ref(null);
-const pictures = ref(null);
+const numbers = ref(null)
+const pictures = ref(null)
 
-const now = $(useNow());
-const countDown = $computed(() => Math.round((+now - start.value) / 1000));
+const now = useNow()
+const countDown = computed(() => Math.round((+now.value - start.value) / 1000))
 
 function newGame(difficulty: GameStaus) {
-  status.value = difficulty;
+  status.value = difficulty
   switch (difficulty) {
-    case "Easy":
+    case 'Easy':
       if (n.value !== 3) {
-        n.value = 3;
-        reset();
+        n.value = 3
+        reset()
       }
-      return;
-    case "Medium":
+      return
+    case 'Medium':
       if (n.value !== 5) {
-        n.value = 5;
-        reset();
+        n.value = 5
+        reset()
       }
-      return;
-    case "Hard":
+      return
+    case 'Hard':
       if (n.value !== 6) {
-        n.value = 6;
-        reset();
+        n.value = 6
+        reset()
       }
-      return;
-    case "Evil":
+      return
+    case 'Evil':
       if (n.value !== 8) {
-        n.value = 8;
-        reset();
+        n.value = 8
+        reset()
       }
-      return;
   }
 }
 
 async function changePicture() {
-  loading.value = true;
-  await baseImage();
-  loading.value = false;
+  loading.value = true
+  await baseImage()
+  loading.value = false
 }
 
 async function getRank() {
-  showRank = !showRank;
-  rankList.value = await initRank(status.value);
+  showRank.value = !showRank.value
+  rankList.value = await initRank(status.value)
 }
 </script>
 
 <template>
-  <information :show="changeName" :close="change"></information>
+  <information :show="changeName" :close="change" />
   <div flex="~" justify-between box-border m-4 border-b-1 class="border-gray:500/10">
     <div
       w-30
@@ -106,8 +106,7 @@ async function getRank() {
         <path
           fill="currentColor"
           d="m199.04 672.64l193.984 112l224-387.968l-193.92-112l-224 388.032zm-23.872 60.16l32.896 148.288l144.896-45.696L175.168 732.8zM455.04 229.248l193.92 112l56.704-98.112l-193.984-112l-56.64 98.112zM104.32 708.8l384-665.024l304.768 175.936L409.152 884.8h.064l-248.448 78.336L104.32 708.8zm384 254.272v-64h448v64h-448z"
-        /></svg
-      >Hi, {{ name }}
+        /></svg>Hi, {{ name }}
     </div>
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -117,10 +116,10 @@ async function getRank() {
       height="1em"
       preserveAspectRatio="xMidYMid meet"
       viewBox="0 0 640 512"
-      @click="getRank()"
       border-10px
       border-transparent
       box-content
+      @click="getRank()"
     >
       <path
         fill="currentColor"
@@ -142,17 +141,17 @@ async function getRank() {
       :style="
         isDark
           ? {
-              'background-color': '#fff',
-              'border-bottom-left-radius': '27%',
-              'border-bottom-right-radius': '27%',
-              'box-shadow': 'lightgrey 0px 0px 15px 5px',
-            }
+            'background-color': '#fff',
+            'border-bottom-left-radius': '27%',
+            'border-bottom-right-radius': '27%',
+            'box-shadow': 'lightgrey 0px 0px 15px 5px',
+          }
           : {
-              'background-color': '#000',
-              'border-bottom-left-radius': ' 25%',
-              'border-bottom-right-radius': '25%',
-              'box-shadow': 'lightgrey 0px 0px 15px 5px',
-            }
+            'background-color': '#000',
+            'border-bottom-left-radius': ' 25%',
+            'border-bottom-right-radius': '25%',
+            'box-shadow': 'lightgrey 0px 0px 15px 5px',
+          }
       "
       text="gray-200 dark:gray-700"
     >
@@ -180,8 +179,8 @@ async function getRank() {
         <vivid-typing
           :interval="100"
           :infinity="true"
-          :content="status + '-Model Ranking'"
-        ></vivid-typing>
+          :content="`${status}-Model Ranking`"
+        />
       </div>
       <div p-y-1>
         <div
@@ -210,7 +209,7 @@ async function getRank() {
     @click="(showRank = false) && (preview = false)"
   >
     <p text-3xl animate-heart-beat m-b-5>
-      <vivid-typing :interval="100" content="N PUZZLE"></vivid-typing>
+      <vivid-typing :interval="100" content="N PUZZLE" />
     </p>
     {{ n }} x {{ n }}
     <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
@@ -238,16 +237,28 @@ async function getRank() {
     </div>
 
     <div flex="~ gap-1" justify="center" p4>
-      <button btn @click="changePicture()" v-show="model === 'picture'">New Pic</button>
-      <button btn @click="reset()">Rest</button>
-      <button btn @click="newGame('Easy')">Easy</button>
-      <button btn @click="newGame('Medium')">Medium</button>
-      <button btn @click="newGame('Hard')">Hard</button>
-      <button btn @click="newGame('Evil')" v-show="model === 'number'">Evil</button>
+      <button v-show="model === 'picture'" btn @click="changePicture()">
+        New Pic
+      </button>
+      <button btn @click="reset()">
+        Rest
+      </button>
+      <button btn @click="newGame('Easy')">
+        Easy
+      </button>
+      <button btn @click="newGame('Medium')">
+        Medium
+      </button>
+      <button btn @click="newGame('Hard')">
+        Hard
+      </button>
+      <button v-show="model === 'number'" btn @click="newGame('Evil')">
+        Evil
+      </button>
     </div>
     <div w-full overflow-hidden :style="{ 'pointer-events': win ? 'none' : '' }">
-      <Number v-if="model === 'number'" :countDown="countDown"></Number>
-      <Picture v-if="model === 'picture'" :countDown="countDown"></Picture>
+      <Number v-if="model === 'number'" :count-down="countDown" />
+      <Picture v-if="model === 'picture'" :count-down="countDown" />
     </div>
   </div>
 </template>
