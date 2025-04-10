@@ -10,6 +10,7 @@ declare module 'vue' {
     Number: typeof import('./src/components/number.vue')['default']
     Picture: typeof import('./src/components/picture.vue')['default']
     Puzzle: typeof import('./src/components/Puzzle.vue')['default']
+    Rank: typeof import('./src/components/Rank.vue')['default']
   }
 }
 

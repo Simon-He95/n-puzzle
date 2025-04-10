@@ -8,25 +8,20 @@ import {
   name,
   nightMode,
   preview,
-  ratio,
+  rankList,
   start,
   status,
   steps,
   win,
 } from '../config'
 import { emptyFlag, isWin } from '../pic'
-import { setData, updateRank } from '../request'
+import { updateRank } from '../request'
 
-const { countDown } = defineProps<{
-  countDown: number
-}>()
+const emits = defineEmits(['win'])
 const currentPos = ref('')
 
 nightMode.value = false
 win.value = false
-n.value = 3
-status.value = 'Easy'
-setData()
 const mode = ref('normal')
 start.value = Date.now()
 
@@ -36,11 +31,17 @@ async function movepic(block: PictureBlock) {
   if (canMove(block)) {
     steps.value++
     // 判断胜利条件
+
     if (isWin()) {
       win.value = true
-      updateRank(countDown, steps.value, name.value, status.value).then(
-        result => (rankList = result),
+      rankList.value = await updateRank(
+        Math.round((Date.now() - start.value) / 1000),
+        steps.value,
+        name.value,
+        status.value,
+        'picture',
       )
+      emits('win')
       alert(
         'Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. ',
       )
@@ -119,25 +120,20 @@ function modelChange() {
     mode.value = 'cheat'
 }
 
-const sizeStyle = $computed(() => {
-  const result = {}
-  if (status.value === 'Easy') {
-    result.width = '7rem !important'
-    result.height = 'auto !important'
-  }
-  else if (status.value === 'Medium') {
-    result.width = '4.4rem !important'
-    result.height = 'auto !important'
-  }
-  else if (status.value === 'Hard') {
-    result.width = '3.6rem !important'
-    result.height = 'auto !important'
-  }
-  else if (status.value === 'Evil') {
-    result.width = '2.75rem !important'
-    result.height = 'auto !important'
-  }
-  result['aspect-ratio'] = ratio.value
+function reset() {
+  win.value = false // 重置游戏完成状态
+  mode.value === 'number' ? numReset() : picReset()
+}
+
+const sizeStyle = computed(() => {
+  const result: Record<string, string> = {}
+  const availableHeight = window.innerHeight - 500 // 减去顶部内容的高度
+  const baseSize = Math.min(window.innerWidth, availableHeight) / (n.value * 1.1) // 调整尺寸以避免滚动条
+
+  result.width = `${baseSize}px`
+  result.height = `${baseSize}px`
+  result.margin = '2px' // 添加间距以保证美观
+  result.transition = loading.value ? 'none' : 'all 0.3s ease' // 禁用加载时的动画
   return result
 })
 
@@ -149,11 +145,20 @@ function openBlock(block: PictureBlock) {
   }
   currentPos.value = block.pos
   clearTimeout(timer)
-  console.log('22')
   timer = setTimeout(() => {
     movepic(block)
     currentPos.value = ''
   }, 500)
+}
+
+async function changePicture() {
+  loading.value = true
+  // 重置游戏状态
+  win.value = false
+  steps.value = 0
+  start.value = Date.now() // 重置倒计时起点
+  await baseImage()
+  loading.value = false
 }
 </script>
 

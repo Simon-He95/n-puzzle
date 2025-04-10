@@ -17,6 +17,7 @@ import { updateRank } from '../request'
 const { countDown } = defineProps<{
   countDown: number
 }>()
+const emits = defineEmits(['win'])
 const emptyFlag = 0
 const currentPos = ref('')
 initData()
@@ -30,8 +31,8 @@ async function move(block: NumberBlock) {
     // 判断胜利条件
     if (isWin()) {
       win.value = true
-      rankList.value = await updateRank(countDown, steps.value, name.value, status.value)
-
+      rankList.value = await updateRank(countDown, steps.value, name.value, status.value, 'number')
+      emits('win')
       alert(
         'Congratulations! You make it! Proud of you！ Check the rankings from the button on the upper right corner. ',
       )
@@ -139,63 +140,87 @@ function openBlock(block: NumberBlock) {
 </script>
 
 <template>
-  <div
-    v-for="(row, y) in arrayNum"
-    :key="y"
-    flex="~"
-    items-center
-    justify-center
-    w-max
-    ma
-    relative
-  >
+  <div v-for="(row, y) in arrayNum" :key="y" flex="~" items-center justify-center w-max ma relative>
     <div
-      v-for="block in row"
-      :key="block.number"
-      flex="~"
-      items-center
-      justify-center
-      border-box
-      m="1px"
-      border="0.5 gray-400/10"
-      class="bg-gray-500/10 hover:bg-gray-500/20"
-      relative
-      :style="sizeStyle()"
-      :class="[
+      v-for="block in row" :key="block.number" flex="~" items-center justify-center border-box m="1px"
+      border="0.5 gray-400/10" class="bg-gray-500/10 hover:bg-gray-500/20" relative :style="sizeStyle()" :class="[
         block?.animateY ? 'animate-shake-y' : '',
         block?.animateX ? 'animate-shake-x' : '',
-      ]"
-      @click.prevent="move(block)"
+      ]" @click.prevent="move(block)"
     >
       {{ block.number === emptyFlag ? "" : block.number }}
       <div
-        v-show="block.number !== emptyFlag && nightMode"
-        absolute
-        class="w-100% h-100%" :class="[
+        v-show="block.number !== emptyFlag && nightMode" absolute class="w-100% h-100%" :class="[
           currentPos === block.number && 'animate',
           isDark ? 'bg-white' : 'bg-dark-400',
-        ]"
-        z-50
-        left-0
-        top-0
-        @click.stop="openBlock(block)"
+        ]" z-50 left-0 top-0 @click.stop="openBlock(block)"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
-@keyframes slide {
-  from {
-    transform: rotateX(0);
+  @keyframes slide {
+    from {
+      transform: rotateX(0);
+    }
+
+    to {
+      visibility: hidden;
+      transform: rotateX(-180deg);
+    }
   }
-  to {
-    visibility: hidden;
-    transform: rotateX(-180deg);
+
+  .animate {
+    transform-origin: top;
+    animation: slide 0.5s linear;
   }
-}
-.animate {
-  transform-origin: top;
-  animation: slide 0.5s linear;
-}
+
+  .puzzle-grid {
+    display: grid;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .puzzle-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .puzzle-block:hover {
+    transform: scale(1.05);
+    background-color: rgba(100, 100, 100, 0.2);
+  }
+
+  .puzzle-block.empty {
+    background-color: transparent;
+    cursor: default;
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(-5px);
+    }
+  }
+
+  .animate-shake-x {
+    animation: shake 0.3s ease;
+  }
+
+  .animate-shake-y {
+    animation: shake 0.3s ease;
+  }
 </style>

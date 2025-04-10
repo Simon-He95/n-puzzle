@@ -89,13 +89,15 @@ async function PicSpace(src: string) {
   })
 }
 
-function randomPic(numbers: any[]) {
-  const result = numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0]
-  return result
-}
 export async function initData(n: number, src: string) {
   const { result: arrayPic, numbers } = await splitImage(n, src) as any
   const copyNumbers = JSON.parse(JSON.stringify(numbers))
+  const flatNumbers = copyNumbers.map((item: any) => item.pos)
+
+  // 确保生成的拼图有解
+  ensureSolvable(flatNumbers, n)
+
+  let index = 0
   for (let i = 0; i < arrayPic.length; i++) {
     for (let j = 0; j < arrayPic[i].length; j++) {
       if (i === 0 && j === 0) {
@@ -105,7 +107,8 @@ export async function initData(n: number, src: string) {
         arrayPic[i][j].animateY = false
         continue
       }
-      const { url, pos } = randomPic(copyNumbers)
+      const pos = flatNumbers[index++]
+      const { url } = copyNumbers.find((item: any) => item.pos === pos)
       randomNumbers.push(pos)
       arrayPic[i][j].url = url
       arrayPic[i][j].pos = pos
@@ -114,6 +117,57 @@ export async function initData(n: number, src: string) {
     }
   }
   return arrayPic
+}
+
+// 确保生成的拼图有解
+function ensureSolvable(flatNumbers: number[], n: number) {
+  let isSolvable = false
+
+  while (!isSolvable) {
+    // 随机打乱数字顺序
+    shuffleArray(flatNumbers)
+
+    // 计算逆序数
+    const inverse = calculateInversions(flatNumbers)
+    const odd = (n & 1) === 1
+
+    if (odd) {
+      // 奇数维度，逆序数必须是偶数
+      isSolvable = inverse % 2 === 0
+    }
+    else {
+      // 偶数维度，考虑空格位置
+      const emptyRowFromBottom = n - Math.floor(flatNumbers.indexOf(-1) / n)
+      const isEmptyRowOdd = (emptyRowFromBottom & 1) === 1
+
+      isSolvable = (isEmptyRowOdd && inverse % 2 !== 0) || (!isEmptyRowOdd && inverse % 2 === 0)
+    }
+  }
+}
+
+// 随机打乱数组
+function shuffleArray(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]
+  }
+}
+
+// 计算逆序数
+function calculateInversions(numbers: number[]): number {
+  let inversions = 0
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === -1)
+      continue // 跳过空格标志
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === -1)
+        continue // 跳过空格标志
+      if (numbers[i] > numbers[j]) {
+        inversions++
+      }
+    }
+  }
+  return inversions
 }
 
 export function isWin(): boolean {

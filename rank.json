@@ -1,1 +1,1 @@
-{ "Easy": [{ "times": "18", "steps": "38", "name": "simon" }], "Medium": [], "Hard": [], "Evil": [] }
+{ "Easy": { "number": [{ "times": "14", "steps": "18", "name": "Simon" }, { "times": "35", "steps": "20", "name": "Simon" }, { "times": "15", "steps": "26", "name": "Simon" }], "picture": [{ "times": "40", "steps": "46", "name": "undefined", "mode": "picture" }] }, "Medium": { "number": [], "picture": [] }, "Hard": { "number": [], "picture": [] }, "Evil": { "number": [], "picture": [] } }

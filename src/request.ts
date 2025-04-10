@@ -1,22 +1,22 @@
 import axios from 'axios'
-import { arrayPic, base64, currentImage, loading, n, picReset, ratio } from './config'
-import { initData, randomNumbers } from './pic'
+import { arrayPic, base64, currentImage, loading, n, ratio } from './config'
+import { initData } from './pic'
 
 // http://api.n-puzzle.hejian.club/rank?type=init&status=Easy
 // const baseUrl = "http://api.n-puzzle.hejian.club/rank?";
 const baseUrl = 'http://localhost:5002/rank?'
 const localUrl = './img/'
 
-export async function initRank(status: string) {
+export async function getRankList(status: string, mode: 'number' | 'picture') {
   const { data } = await axios
-    .get(`${baseUrl}type=init&status=${status}`)
+    .get(`${baseUrl}type=init&status=${status}&mode=${mode}`)
   return data
 }
 
-export async function updateRank(countDown: number, steps: number, name: string, status: string) {
+export async function updateRank(countDown: number, steps: number, name: string, status: string, mode: 'number' | 'picture') {
   const { data } = await axios
     .get(
-      `${baseUrl}times=${countDown}&steps=${steps}&name=${name}&status=${status}`,
+      `${baseUrl}times=${countDown}&steps=${steps}&name=${name}&status=${status}&mode=${mode}`,
     )
   return data
 }
@@ -66,8 +66,7 @@ function picIndex(): number {
 async function dealPicture(baseUrl: string, resolve: any) {
   base64.value = baseUrl
   arrayPic.value = await initData(n.value, base64.value)
-  isFresh()
-  setData()
+  // setData()
   const image = new Image()
   image.src = base64.value
   image.onload = () => {
@@ -77,31 +76,6 @@ async function dealPicture(baseUrl: string, resolve: any) {
   resolve('success')
 }
 
-// 判断此题是否有解
-function isFresh() {
-  let inverse = 0
-  const preNumber: number[] = []
-  const odd = (n.value & 1) === 1
-  randomNumbers.reduce((pre, cur) => {
-    preNumber.push(pre)
-    preNumber.forEach((item) => {
-      if (item > cur)
-        inverse++
-    })
-    return cur
-  }, 0)
-  randomNumbers.length = 0
-  if (odd && (inverse & 1) === 1) {
-    // 无解重新生成
-    picReset()
-  }
-  else if (!odd && (inverse & 1) === 0) {
-    // 无解重新生成
-    picReset()
-  }
-}
-
 export async function setData() {
   arrayPic.value = await initData(n.value, base64.value)
-  isFresh()
 }

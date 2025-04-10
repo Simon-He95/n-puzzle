@@ -2,6 +2,7 @@ import simon from '@antfu/eslint-config'
 
 export default simon({
   rules: {
+    'no-alert': 'off',
     'no-console': 'off',
     'ts/ban-types': 'off',
     'jsdoc/require-returns-description': 'off',

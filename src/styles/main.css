@@ -3,13 +3,32 @@ body,
 #app {
   margin: 0;
   padding: 0;
+  /* 添加颜色和背景过渡动画 */
+  transition: color 0.5s ease, background-color 0.5s ease;
 }
 
 html.dark {
   background: #121212;
+  /* 当切换到暗色模式时，所有元素都应用过渡 */
+  color-scheme: dark;
+}
+
+/* 为所有可能受主题影响的元素添加过渡效果 */
+* {
+  transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
 #app{
   width:100%;
   overflow:hidden;
+}
+
+/* 当前选中难度的高亮样式 */
+.active-difficulty {
+  box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.5);
+  font-weight: bold;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+  color: #ffeb3b !important; /* 亮黄色文字 */
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7); /* 文字阴影增强可读性 */
 }
