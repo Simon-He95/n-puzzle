@@ -4,7 +4,9 @@ import { initData } from './pic'
 
 // http://api.n-puzzle.hejian.club/rank?type=init&status=Easy
 // const baseUrl = "http://api.n-puzzle.hejian.club/rank?";
-const baseUrl = 'http://localhost:5002/rank?'
+// const baseUrl = 'http://localhost:5002/rank?'
+// 使用相对路径，自动适应不同环境
+const baseUrl = '/.netlify/functions/rank?'
 const localUrl = './img/'
 
 export async function getRankList(status: string, mode: 'number' | 'picture') {
