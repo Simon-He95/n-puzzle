@@ -3,7 +3,9 @@ import { arrayPic, base64, currentImage, loading, n, ratio } from './config'
 import { initData } from './pic'
 
 // http://api.n-puzzle.hejian.club/rank?type=init&status=Easy
-// const baseUrl = "http://api.n-puzzle.hejian.club/rank?";
+// const baseUrl = import.meta.env.DEV
+//   ? 'http://localhost:5002/rank?'
+//   : "/.netlify/functions/rank?";
 // const baseUrl = 'http://localhost:5002/rank?'
 // 使用相对路径，自动适应不同环境
 const baseUrl = '/.netlify/functions/rank?'
@@ -12,6 +14,18 @@ const localUrl = './img/'
 export async function getRankList(status: string, mode: 'number' | 'picture') {
   const { data } = await axios
     .get(`${baseUrl}type=init&status=${status}&mode=${mode}`)
+  if (typeof data === 'string') {
+    // 访问不到正确的数据，从本地缓存中获取数据
+    const rankList = localStorage.getItem('rank')
+    if (rankList) {
+      const localData = JSON.parse(rankList)
+      // 过滤出对应的状态
+      const filteredData = localData.filter((item: any) => item.status === status && item.mode === mode)
+      return filteredData
+    }
+    // 如果没有本地缓存数据，返回空数组
+    return []
+  }
   return data
 }
 
@@ -20,6 +34,22 @@ export async function updateRank(countDown: number, steps: number, name: string,
     .get(
       `${baseUrl}times=${countDown}&steps=${steps}&name=${name}&status=${status}&mode=${mode}`,
     )
+  if (typeof data === 'string') {
+    // 访问不到正确的数据，使用本地缓存数据
+    const rankList = localStorage.getItem('rank')
+    // 追加数据
+    const localData = rankList ? JSON.parse(rankList) : []
+    const newData = {
+      name,
+      steps,
+      times: countDown,
+      status,
+      mode,
+    }
+    localData.push(newData)
+    localStorage.setItem('rank', JSON.stringify(localData))
+    return []
+  }
   return data
 }
 

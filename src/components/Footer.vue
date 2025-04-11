@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isDark, toggleDark } from '~/composables'
-import { model, nightMode, preview } from '../config'
+import { model, n, nightMode, preview, status } from '../config'
 
 function changeModel() {
   preview.value = false
@@ -8,20 +8,16 @@ function changeModel() {
     model.value = 'picture'
   else
     model.value = 'number'
+  status.value = 'Easy'
+  n.value = 3
 }
 </script>
 
 <template>
   <nav text-xl p-y-10 inline-flex gap-12 items-center>
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      role="img"
-      width="1em"
-      height="1em"
-      preserveAspectRatio="xMidYMid meet"
-      viewBox="0 0 1200 1200"
-      @click="nightMode = !nightMode"
+      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+      preserveAspectRatio="xMidYMid meet" viewBox="0 0 1200 1200" @click="nightMode = !nightMode"
     >
       <path
         fill="currentColor"
@@ -30,14 +26,8 @@ function changeModel() {
     </svg>
     <button text-2xl @click="changeModel()">
       <svg
-        v-show="model === 'number'"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        role="img"
-        style="vertical-align: -0.125em"
-        width="1em"
-        height="1em"
-        preserveAspectRatio="xMidYMid meet"
+        v-show="model === 'number'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
+        style="vertical-align: -0.125em" width="1em" height="1em" preserveAspectRatio="xMidYMid meet"
         viewBox="0 0 36 36"
       >
         <path
@@ -46,23 +36,14 @@ function changeModel() {
           class="clr-i-solid--badged clr-i-solid-path-1--badged"
         />
         <circle
-          cx="30"
-          cy="6"
-          r="5"
-          fill="currentColor"
+          cx="30" cy="6" r="5" fill="currentColor"
           class="clr-i-solid--badged clr-i-solid-path-2--badged clr-i-badge"
         />
         <path fill="none" d="M0 0h36v36H0z" />
       </svg>
       <svg
-        v-show="model === 'picture'"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        role="img"
-        style="vertical-align: -0.125em"
-        width="1em"
-        height="1em"
-        preserveAspectRatio="xMidYMid meet"
+        v-show="model === 'picture'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
+        style="vertical-align: -0.125em" width="1em" height="1em" preserveAspectRatio="xMidYMid meet"
         viewBox="0 0 32 32"
       >
         <path
@@ -72,19 +53,13 @@ function changeModel() {
         <path fill="currentColor" d="M6 10v12v-12m1-1H2v2h3v10H2v2h8v-2H7V9Z" />
       </svg>
     </button>
-
     <button class="icon-btn !outline-none" @click="toggleDark()">
       <div v-if="isDark" i-carbon-moon />
       <div v-else i-carbon-sun />
     </button>
-
     <a
-      class="icon-btn"
-      i-carbon-logo-github
-      rel="noreferrer"
-      href="https://github.com/Simon-He95/n-puzzle"
-      target="_blank"
-      title="GitHub"
+      class="icon-btn" i-carbon-logo-github rel="noreferrer" href="https://github.com/Simon-He95/n-puzzle"
+      target="_blank" title="GitHub"
     />
   </nav>
 </template>

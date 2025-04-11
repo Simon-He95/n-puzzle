@@ -29,7 +29,7 @@ function change() {
   start.value = Date.now()
 }
 const showRank = ref(false)
-const finishTime = ref(null)
+const finishTime = ref<any>(null)
 function reset() {
   finishTime.value = null // 重置完成时间
   win.value = false
@@ -126,7 +126,7 @@ function winHandler() {
         d="M406.1 61.65c9.3 1.44 13.3 12.94 6.5 19.76l-38 36.69l9 52c.5 9.4-8.3 16.6-16.9 12.3l-46.5-24.5l-46.9 24.8c-8.6 4.3-18.3-2.9-16.9-12.2l9-52.1l-38-36.99c-6.8-6.82-2.8-18.32 6.5-19.76l52.3-7.54l23.6-47.778c4.3-8.621 16.5-8.262 20.4 0l23.6 47.778l52.3 7.54zM384 256c17.7 0 32 14.3 32 32v192c0 17.7-14.3 32-32 32H256c-17.7 0-32-14.3-32-32V288c0-17.7 14.3-32 32-32h128zm-224 64c17.7 0 32 14.3 32 32v128c0 17.7-14.3 32-32 32H32c-17.67 0-32-14.3-32-32V352c0-17.7 14.33-32 32-32h128zm288 96c0-17.7 14.3-32 32-32h128c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H480c-17.7 0-32-14.3-32-32v-64z"
       />
     </svg>
-    <Rank v-if="showRank" :current-mode="model" :rank-list="rankList" @back="showRank = false" />
+    <Rank v-if="showRank" :current-mode="model" :rank-list="rankList" :difficulty="status" @back="showRank = false" />
   </div>
   <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="(showRank = false) && (preview = false)">
     <p text-3xl animate-heart-beat m-b-5>

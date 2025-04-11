@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: 'picture', // 默认显示图片模式排名
   },
+  difficulty: {
+    type: String,
+    default: 'Easy', // 添加难度属性
+  },
 })
 
 // 添加响应式状态跟踪当前显示的排名类型
@@ -18,16 +22,36 @@ const filteredRankList = computed(() => {
   return props.rankList
 })
 
-// 切换排名模式
-function toggleMode() {
-  activeMode.value = activeMode.value === 'picture' ? 'number' : 'picture'
-}
+// 根据难度级别返回相应的颜色
+const difficultyColor = computed(() => {
+  switch (props.difficulty) {
+    case 'Easy': return '#4CAF50' // 绿色
+    case 'Medium': return '#2196F3' // 蓝色
+    case 'Hard': return '#FF9800' // 橙色
+    case 'Evil': return '#F44336' // 红色
+    default: return '#4CAF50'
+  }
+})
+
+// 根据难度级别返回相应的图标类型
+const difficultyIcon = computed(() => {
+  switch (props.difficulty) {
+    case 'Easy': return '★'
+    case 'Medium': return '★★'
+    case 'Hard': return '★★★'
+    case 'Evil': return '★★★★'
+    default: return '★'
+  }
+})
 </script>
 
 <template>
   <div class="rank-overlay" />
   <div class="rank-container">
     <h1 class="rank-title">
+      <div class="difficulty-badge" :style="{ backgroundColor: difficultyColor }">
+        <span class="difficulty-icon">{{ difficultyIcon }}</span>
+      </div>
       {{ activeMode === 'picture' ? '图片拼图' : '数字拼图' }}排行榜
     </h1>
 
@@ -38,7 +62,7 @@ function toggleMode() {
       <div v-for="(rank, index) in filteredRankList" v-else :key="index" class="rank-item">
         <span class="rank-position">{{ index + 1 }}</span>
         <span class="rank-name">{{ rank.name }}</span>
-        <span class="rank-score">分数: {{ rank.score }}</span>
+        <span class="rank-time">用时: {{ rank.times }}秒</span>
         <span class="rank-steps">步数: {{ rank.steps }}</span>
       </div>
     </div>
@@ -143,7 +167,7 @@ function toggleMode() {
   padding-left: 0.5rem;
 }
 
-.rank-score,
+.rank-time,
 .rank-steps {
   color: #777;
   font-size: 0.9rem;
@@ -178,5 +202,26 @@ function toggleMode() {
 
 .toggle-button:hover {
   background-color: #218838;
+}
+
+.difficulty-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  color: white;
+  font-weight: bold;
+  margin-right: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  min-width: 60px;
+  text-align: center;
+}
+
+.difficulty-icon {
+  letter-spacing: -2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 1.1rem;
 }
 </style>
