@@ -7,8 +7,20 @@ body,
   transition: color 0.5s ease, background-color 0.5s ease;
 }
 
+html {
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(45, 212, 191, 0.25), rgba(45, 212, 191, 0)),
+    radial-gradient(900px 520px at 100% 0%, rgba(34, 211, 238, 0.22), rgba(34, 211, 238, 0)),
+    radial-gradient(900px 520px at 10% 110%, rgba(124, 58, 237, 0.14), rgba(124, 58, 237, 0)),
+    #f7fafc;
+}
+
 html.dark {
-  background: #121212;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(45, 212, 191, 0.2), rgba(45, 212, 191, 0)),
+    radial-gradient(900px 520px at 100% 0%, rgba(34, 211, 238, 0.16), rgba(34, 211, 238, 0)),
+    radial-gradient(900px 520px at 10% 110%, rgba(124, 58, 237, 0.14), rgba(124, 58, 237, 0)),
+    #0b0f14;
   /* 当切换到暗色模式时，所有元素都应用过渡 */
   color-scheme: dark;
 }
@@ -25,10 +37,13 @@ html.dark {
 
 /* 当前选中难度的高亮样式 */
 .active-difficulty {
-  box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.55), 0 14px 26px rgba(34, 211, 238, 0.12);
   font-weight: bold;
-  transform: scale(1.05);
+  transform: translateY(-1px);
   transition: all 0.3s ease;
-  color: #ffeb3b !important; /* 亮黄色文字 */
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7); /* 文字阴影增强可读性 */
+  color: #0b1020 !important;
+}
+
+html.dark .active-difficulty {
+  color: #e6f6ff !important;
 }

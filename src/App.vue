@@ -5,7 +5,7 @@ baseImage()
 </script>
 
 <template>
-  <main font-sans p-b-5 text="center gray-700 dark:gray-200">
+  <main font-sans min-h-screen p-b-10 text="center gray-900 dark:gray-100">
     <Puzzle />
     <Footer />
   </main>

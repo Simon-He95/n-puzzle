@@ -5,6 +5,7 @@ import {
   model,
   n,
   name,
+  nightMode,
   numReset,
   picReset,
   preview,
@@ -12,159 +13,452 @@ import {
   start,
   status,
   steps,
+  view3d,
   win,
 } from '../config'
 import { baseImage, getRankList } from '../request'
 
 useStorage('playName', name)
 
-const changeName = ref(true)
-if (name.value)
-  changeName.value = false
+const showName = ref(!name.value)
+const showRank = ref(false)
+const showWin = ref(false)
+const showHelp = ref(false)
+const finishTime = ref<number | null>(null)
+const winPayload = ref<{ time: number, steps: number } | null>(null)
+const newBest = ref(false)
+
+const bestRecords = useStorage<Record<string, { time: number, steps: number }>>('bestRecords', {})
+const bestKey = computed(() => `${model.value}:${status.value}:${n.value}`)
+const best = computed(() => bestRecords.value[bestKey.value])
 
 start.value = Date.now()
 
-function change() {
-  changeName.value = false
+function closeName() {
+  showName.value = false
   start.value = Date.now()
 }
-const showRank = ref(false)
-const finishTime = ref<any>(null)
-function reset() {
-  finishTime.value = null // 重置完成时间
-  win.value = false
-  model.value === 'number' ? numReset() : picReset()
+
+function closePanels() {
+  showRank.value = false
+  preview.value = false
 }
 
 const now = useNow()
-// 添加一个完成时间变量
-
 const countDown = computed(() => {
-  // 如果已完成，使用完成时间
-  if (finishTime.value) {
+  if (finishTime.value)
     return Math.round((finishTime.value - start.value) / 1000)
-  }
-  // 否则继续实时更新
   return Math.round((+now.value - start.value) / 1000)
 })
 
-function newGame(difficulty: GameStaus) {
-  status.value = difficulty
+async function reset() {
+  closePanels()
+  showHelp.value = false
+  finishTime.value = null
+  win.value = false
+  showWin.value = false
+  winPayload.value = null
+  newBest.value = false
+
+  if (model.value === 'number')
+    numReset()
+  else
+    await picReset()
+
+  start.value = Date.now()
+}
+
+function sizeByDifficulty(difficulty: GameStaus) {
   switch (difficulty) {
-    case 'Easy':
-      if (n.value !== 3) {
-        n.value = 3
-        reset()
-      }
-      return
-    case 'Medium':
-      if (n.value !== 5) {
-        n.value = 5
-        reset()
-      }
-      return
-    case 'Hard':
-      if (n.value !== 6) {
-        n.value = 6
-        reset()
-      }
-      return
-    case 'Evil':
-      if (n.value !== 8) {
-        n.value = 8
-        reset()
-      }
+    case 'Easy': return 3
+    case 'Medium': return 5
+    case 'Hard': return 6
+    case 'Evil': return 8
   }
 }
 
+async function newGame(difficulty: GameStaus) {
+  status.value = difficulty
+  n.value = sizeByDifficulty(difficulty)
+  await reset()
+}
+
 async function changePicture() {
+  closePanels()
+  showHelp.value = false
   loading.value = true
   win.value = false
-  finishTime.value = null // 重置完成时间
+  showWin.value = false
+  finishTime.value = null
   steps.value = 0
   await baseImage()
   start.value = Date.now()
   loading.value = false
 }
 
-async function getRank() {
-  showRank.value = !showRank.value
+async function toggleRank() {
+  if (showRank.value) {
+    showRank.value = false
+    return
+  }
+  closePanels()
+  showHelp.value = false
+  showRank.value = true
   rankList.value = await getRankList(status.value, model.value)
-  console.log({ rankList })
 }
 
-function winHandler() {
-  // 存储完成时的时间
+const numberRef = ref<any>(null)
+const pictureRef = ref<any>(null)
+const activeBoard = computed(() => (model.value === 'number' ? numberRef.value : pictureRef.value))
+
+function undo() {
+  activeBoard.value?.undo?.()
+}
+
+function redo() {
+  activeBoard.value?.redo?.()
+}
+
+function hint() {
+  activeBoard.value?.hint?.()
+}
+
+function toggleNumbers() {
+  pictureRef.value?.toggleNumbers?.()
+}
+
+function toggleFog() {
+  nightMode.value = !nightMode.value
+}
+
+function toggle3d() {
+  view3d.value = !view3d.value
+}
+
+function betterRecord(a: { time: number, steps: number }, b: { time: number, steps: number }) {
+  if (a.steps !== b.steps)
+    return a.steps < b.steps
+  return a.time < b.time
+}
+
+function winHandler(payload: { time: number, steps: number }) {
   finishTime.value = Date.now()
+  winPayload.value = payload
+  showWin.value = true
 
-  // 其他完成后的逻辑
-  console.log(`Puzzle completed in ${Math.round((finishTime.value - start.value) / 1000)} seconds with ${steps.value} steps`)
+  const key = bestKey.value
+  const prev = bestRecords.value[key]
+  newBest.value = !prev || betterRecord(payload, prev)
+  if (newBest.value)
+    bestRecords.value = { ...bestRecords.value, [key]: payload }
 }
+
+watch(() => model.value, () => {
+  void reset()
+})
 </script>
 
 <template>
-  <information :show="changeName" :close="change" />
-  <div flex="~" justify-between box-border m-4 border-b-1 class="border-gray:500/10">
-    <div w-30 text-left overflow-hidden text-ellipsis flex="~" items-center @click="changeName = true">
-      <svg
-        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" style="vertical-align: -0.125em" width="1em"
-        height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1024 1024" m-r-1
-      >
-        <path
-          fill="currentColor"
-          d="m199.04 672.64l193.984 112l224-387.968l-193.92-112l-224 388.032zm-23.872 60.16l32.896 148.288l144.896-45.696L175.168 732.8zM455.04 229.248l193.92 112l56.704-98.112l-193.984-112l-56.64 98.112zM104.32 708.8l384-665.024l304.768 175.936L409.152 884.8h.064l-248.448 78.336L104.32 708.8zm384 254.272v-64h448v64h-448z"
-        />
-      </svg>Hi, {{ name }}
+  <information :show="showName" :close="closeName" />
+  <WinModal
+    :open="showWin"
+    :mode="model"
+    :difficulty="status"
+    :size="n"
+    :time="winPayload?.time ?? countDown"
+    :steps="winPayload?.steps ?? steps"
+    :best="best"
+    :new-best="newBest"
+    @close="showWin = false"
+    @again="reset"
+    @rank="toggleRank"
+  />
+  <HelpModal :open="showHelp" @close="showHelp = false" />
+
+  <div class="shell" @click.self="closePanels">
+    <div class="topbar">
+      <button class="player" @click="showName = true">
+        <span class="dot" />
+        <span class="player-name">Hi, {{ name || 'Player' }}</span>
+      </button>
+
+      <div class="top-actions">
+        <button class="icon" title="怎么玩" @click="showHelp = true">
+          <div i-carbon-help />
+        </button>
+        <button class="icon" :title="view3d ? '关闭3D' : '开启3D'" @click="toggle3d()">
+          <div i-carbon-cube-view />
+        </button>
+        <button class="icon" title="排行榜" @click="toggleRank()">
+          <div i-carbon-trophy />
+        </button>
+        <button class="icon" :title="nightMode ? '关闭迷雾' : '开启迷雾'" @click="toggleFog()">
+          <div v-if="nightMode" i-carbon-view />
+          <div v-else i-carbon-view-off />
+        </button>
+        <button v-if="model === 'picture'" class="icon" title="显示/隐藏编号" @click="toggleNumbers()">
+          <div i-carbon-list-numbered />
+        </button>
+      </div>
     </div>
-    <svg
-      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.25em" height="1em"
-      preserveAspectRatio="xMidYMid meet" viewBox="0 0 640 512" border-10px border-transparent box-content
-      @click="getRank()"
-    >
-      <path
-        fill="currentColor"
-        d="M406.1 61.65c9.3 1.44 13.3 12.94 6.5 19.76l-38 36.69l9 52c.5 9.4-8.3 16.6-16.9 12.3l-46.5-24.5l-46.9 24.8c-8.6 4.3-18.3-2.9-16.9-12.2l9-52.1l-38-36.99c-6.8-6.82-2.8-18.32 6.5-19.76l52.3-7.54l23.6-47.778c4.3-8.621 16.5-8.262 20.4 0l23.6 47.778l52.3 7.54zM384 256c17.7 0 32 14.3 32 32v192c0 17.7-14.3 32-32 32H256c-17.7 0-32-14.3-32-32V288c0-17.7 14.3-32 32-32h128zm-224 64c17.7 0 32 14.3 32 32v128c0 17.7-14.3 32-32 32H32c-17.67 0-32-14.3-32-32V352c0-17.7 14.33-32 32-32h128zm288 96c0-17.7 14.3-32 32-32h128c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H480c-17.7 0-32-14.3-32-32v-64z"
-      />
-    </svg>
+
     <Rank v-if="showRank" :current-mode="model" :rank-list="rankList" :difficulty="status" @back="showRank = false" />
-  </div>
-  <div font-sans p="t-10" text="center gray-700 dark:gray-200" @click="(showRank = false) && (preview = false)">
-    <p text-3xl animate-heart-beat m-b-5>
-      <vivid-typing :interval="100" content="N PUZZLE" />
-    </p> {{ n }} x {{ n }} <div font-mono text-xl flex="~ gap-1" items-center justify="center" m-t-5>
-      <div i-carbon-timer /> {{ countDown }} <svg
-        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
-        width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 512 512" m-l-1
-      >
-        <path
-          fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"
-          d="M200 246.84c8.81 58.62-7.33 90.67-52.91 97.41c-50.65 7.49-71.52-26.44-80.33-85.06c-11.85-78.88 16-127.94 55.71-131.1c36.14-2.87 68.71 60.14 77.53 118.75Zm23.65 162.69c3.13 33.28-14.86 64.34-42 69.66c-27.4 5.36-58.71-16.37-65.09-49.19s17.75-34.56 47.32-40.21s55.99-20.4 59.77 19.74ZM312 150.83c-8.81 58.62 7.33 90.67 52.9 97.41c50.66 7.49 71.52-26.44 80.33-85.06c11.86-78.89-16-128.22-55.7-131.1c-36.4-2.64-68.71 60.13-77.53 118.75Zm-23.65 162.7c-3.13 33.27 14.86 64.34 42 69.66c27.4 5.36 58.71-16.37 65.09-49.19s-17.75-34.56-47.32-40.22s-55.99-20.4-59.77 19.75Z"
-        />
-      </svg> {{ steps }}
+
+    <div class="headline">
+      <p text-3xl font-bold>
+        <vivid-typing :interval="90" content="N PUZZLE" />
+      </p>
+      <div class="sub">
+        {{ status }} · {{ n }}×{{ n }} · {{ model === 'number' ? '数字' : '图片' }}
+      </div>
     </div>
-    <div flex="~ gap-4 wrap" justify="center" p4>
-      <button v-show="model === 'picture'" btn @click="changePicture()">
-        New Pic
-      </button>
-      <button btn @click="reset()">
-        Rest
-      </button>
-      <button btn :class="{ 'active-difficulty': status === 'Easy' }" @click="newGame('Easy')">
-        Easy
-      </button>
-      <button btn :class="{ 'active-difficulty': status === 'Medium' }" @click="newGame('Medium')">
-        Medium
-      </button>
-      <button btn :class="{ 'active-difficulty': status === 'Hard' }" @click="newGame('Hard')">
-        Hard
-      </button>
-      <button v-show="model === 'number'" btn :class="{ 'active-difficulty': status === 'Evil' }" @click="newGame('Evil')">
-        Evil
-      </button>
+
+    <div class="panel">
+      <div class="stats">
+        <div class="stat">
+          <div class="k">
+            <div i-carbon-timer /> 用时
+          </div>
+          <div class="v">
+            {{ countDown }}s
+          </div>
+        </div>
+        <div class="stat">
+          <div class="k">
+            <div i-carbon-movement /> 步数
+          </div>
+          <div class="v">
+            {{ steps }}
+          </div>
+        </div>
+        <div class="stat">
+          <div class="k">
+            <div i-carbon-badge /> 最佳
+          </div>
+          <div class="v">
+            <span v-if="best">{{ best.steps }}步 / {{ best.time }}s</span>
+            <span v-else>-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="row">
+          <button btn class="!px-3" :disabled="win" title="撤销" @click="undo()">
+            <div i-carbon-undo />
+          </button>
+          <button btn class="!px-3" :disabled="win" title="重做" @click="redo()">
+            <div i-carbon-redo />
+          </button>
+          <button btn class="!px-3" :disabled="win" title="提示" @click="hint()">
+            <div i-carbon-idea />
+          </button>
+
+          <button v-if="model === 'picture'" btn class="!px-4" :disabled="loading" @click="changePicture()">
+            New Pic
+          </button>
+          <button btn class="!px-4" :disabled="loading" @click="reset()">
+            Reset
+          </button>
+        </div>
+
+        <div class="row">
+          <button btn :class="{ 'active-difficulty': status === 'Easy' }" @click="newGame('Easy')">
+            Easy
+          </button>
+          <button btn :class="{ 'active-difficulty': status === 'Medium' }" @click="newGame('Medium')">
+            Medium
+          </button>
+          <button btn :class="{ 'active-difficulty': status === 'Hard' }" @click="newGame('Hard')">
+            Hard
+          </button>
+          <button v-if="model === 'number'" btn :class="{ 'active-difficulty': status === 'Evil' }" @click="newGame('Evil')">
+            Evil
+          </button>
+        </div>
+      </div>
+
+      <div class="hintline">
+        键盘：WASD/方向键 · 触屏：滑动 · 点击：移动相邻方块
+      </div>
     </div>
-    <div w-full overflow-hidden :style="{ 'pointer-events': win ? 'none' : '' }">
-      <Number v-if="model === 'number'" :count-down="countDown" @win="winHandler" />
-      <Picture v-else-if="model === 'picture'" :count-down="countDown" @win="winHandler" />
+
+    <div class="board-wrap" :style="{ 'pointer-events': win ? 'none' : '' }">
+      <Number v-if="model === 'number'" ref="numberRef" :count-down="countDown" @win="winHandler" />
+      <Picture v-else-if="model === 'picture'" ref="pictureRef" :count-down="countDown" @win="winHandler" />
     </div>
   </div>
 </template>
+
+<style scoped>
+.shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(120, 120, 120, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.35));
+  backdrop-filter: blur(10px);
+}
+
+html.dark .topbar {
+  background: linear-gradient(180deg, rgba(20, 20, 20, 0.65), rgba(20, 20, 20, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 120, 120, 0.12);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+html.dark .player {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2dd4bf, #22d3ee);
+  box-shadow: 0 6px 14px rgba(45, 212, 191, 0.25);
+}
+
+.player-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 120, 120, 0.12);
+  background: rgba(255, 255, 255, 0.35);
+  color: rgba(15, 23, 42, 0.85);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+html.dark .icon {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.icon:hover {
+  transform: translateY(-1px);
+}
+
+.headline {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.sub {
+  margin-top: 6px;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+.panel {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(120, 120, 120, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.35));
+  backdrop-filter: blur(10px);
+}
+
+html.dark .panel {
+  background: linear-gradient(180deg, rgba(20, 20, 20, 0.65), rgba(20, 20, 20, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  border-radius: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(120, 120, 120, 0.12);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+html.dark .stat {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.k {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.v {
+  margin-top: 6px;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.controls {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.hintline {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.board-wrap {
+  margin-top: 14px;
+}
+
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

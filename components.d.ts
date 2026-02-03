@@ -5,12 +5,14 @@
 declare module 'vue' {
   export interface GlobalComponents {
     Footer: typeof import('./src/components/Footer.vue')['default']
+    HelpModal: typeof import('./src/components/HelpModal.vue')['default']
     Information: typeof import('./src/components/information.vue')['default']
     Loading: typeof import('./src/components/Loading.vue')['default']
     Number: typeof import('./src/components/number.vue')['default']
     Picture: typeof import('./src/components/picture.vue')['default']
     Puzzle: typeof import('./src/components/Puzzle.vue')['default']
     Rank: typeof import('./src/components/Rank.vue')['default']
+    WinModal: typeof import('./src/components/WinModal.vue')['default']
   }
 }
 

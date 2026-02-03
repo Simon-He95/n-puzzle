@@ -46,7 +46,8 @@ const difficultyIcon = computed(() => {
 </script>
 
 <template>
-  <div class="rank-overlay" />
+  <!-- eslint-disable-next-line vue/require-explicit-emits -->
+  <div class="rank-overlay" @click="$emit('back')" />
   <div class="rank-container">
     <h1 class="rank-title">
       <div class="difficulty-badge" :style="{ backgroundColor: difficultyColor }">
@@ -84,11 +85,19 @@ const difficultyIcon = computed(() => {
   flex-direction: column;
   align-items: center;
   padding: 1.5rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 22px;
+  border: 1px solid rgba(120, 120, 120, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65));
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
   width: 90%;
   max-width: 500px;
+}
+
+html.dark .rank-container {
+  background: linear-gradient(180deg, rgba(20, 20, 20, 0.92), rgba(20, 20, 20, 0.65));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.35);
 }
 
 .rank-overlay {
@@ -150,9 +159,14 @@ const difficultyIcon = computed(() => {
   grid-template-columns: 1fr 2fr 1fr 1fr;
   align-items: center;
   padding: 0.75rem;
-  background-color: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: 1px solid rgba(120, 120, 120, 0.12);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+html.dark .rank-item {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .rank-position {
@@ -177,16 +191,17 @@ const difficultyIcon = computed(() => {
 .back-button {
   margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #007bff;
-  color: #ffffff;
+  background: linear-gradient(180deg, #2dd4bf, #22d3ee);
+  color: #0b1020;
   border: none;
-  border-radius: 4px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .back-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
 .toggle-button {
