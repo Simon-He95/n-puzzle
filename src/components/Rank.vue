@@ -80,7 +80,7 @@ const difficultyIcon = computed(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 1301;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -107,7 +107,7 @@ html.dark .rank-container {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 1300;
 }
 
 .rank-title {

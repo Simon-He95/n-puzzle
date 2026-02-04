@@ -4,6 +4,10 @@ export interface NumberBlock {
   y: number
   animateX: boolean
   animateY: boolean
+  moveX?: number
+  moveY?: number
+  flip?: boolean
+  flipAxis?: 'x' | 'y'
 }
 
 export interface PictureBlock {
@@ -13,5 +17,9 @@ export interface PictureBlock {
   pos: number
   animateX: boolean
   animateY: boolean
+  moveX?: number
+  moveY?: number
+  flip?: boolean
+  flipAxis?: 'x' | 'y'
 }
 export type GameStaus = 'Easy' | 'Medium' | 'Hard' | 'Evil'

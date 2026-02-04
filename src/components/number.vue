@@ -33,6 +33,10 @@ const hinted = ref<number | null>(null)
 
 const boardRef = ref<HTMLElement | null>(null)
 let touchStart: { x: number, y: number } | null = null
+let kickTimer: any = null
+let flipTimer: any = null
+let gyroListening = false
+let gyroPermission: 'unknown' | 'granted' | 'denied' = 'unknown'
 
 initData()
 
@@ -62,13 +66,53 @@ function swapBlocks(a: { x: number, y: number }, b: { x: number, y: number }) {
   aBlock.number = bBlock.number
   bBlock.number = temp
 
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+
+  aBlock.moveX = dx
+  aBlock.moveY = dy
+  bBlock.moveX = -dx
+  bBlock.moveY = -dy
+
+  aBlock.flipAxis = dx !== 0 ? 'y' : 'x'
+  bBlock.flipAxis = aBlock.flipAxis
+  const canFlip = view3d.value
+  aBlock.flip = canFlip && aBlock.number !== emptyFlag
+  bBlock.flip = canFlip && bBlock.number !== emptyFlag
+
   const animateKey = a.x === b.x ? 'animateY' : 'animateX'
   aBlock[animateKey] = true
   bBlock[animateKey] = true
   setTimeout(() => {
     aBlock[animateKey] = false
     bBlock[animateKey] = false
-  }, 120)
+
+    aBlock.moveX = 0
+    aBlock.moveY = 0
+    bBlock.moveX = 0
+    bBlock.moveY = 0
+  }, 180)
+
+  if (canFlip) {
+    clearTimeout(flipTimer)
+    flipTimer = setTimeout(() => {
+      aBlock.flip = false
+      bBlock.flip = false
+    }, 260)
+  }
+}
+
+function kickBoard() {
+  if (!view3d.value)
+    return
+  const el = boardRef.value
+  if (!el)
+    return
+  el.style.setProperty('--kick', '34px')
+  clearTimeout(kickTimer)
+  kickTimer = setTimeout(() => {
+    el.style.setProperty('--kick', '0px')
+  }, 28)
 }
 
 function isWin(): boolean {
@@ -114,6 +158,7 @@ function moveEmpty(dir: MoveDir, options?: { record?: boolean, stepDelta?: numbe
     return false
 
   swapBlocks(empty, target)
+  kickBoard()
   if (stepDelta !== 0)
     steps.value = Math.max(0, steps.value + stepDelta)
 
@@ -331,6 +376,14 @@ function setBoardTilt(xRatio: number, yRatio: number) {
   el.style.setProperty('--ry', `${ry}deg`)
 }
 
+function setBoardLight(xRatio: number, yRatio: number) {
+  const el = boardRef.value
+  if (!el)
+    return
+  el.style.setProperty('--lx', `${(xRatio * 100).toFixed(1)}%`)
+  el.style.setProperty('--ly', `${(yRatio * 100).toFixed(1)}%`)
+}
+
 function onPointerMove(e: PointerEvent) {
   if (!view3d.value)
     return
@@ -340,19 +393,83 @@ function onPointerMove(e: PointerEvent) {
   const rect = el.getBoundingClientRect()
   const x = (e.clientX - rect.left) / rect.width
   const y = (e.clientY - rect.top) / rect.height
-  if (Number.isFinite(x) && Number.isFinite(y))
-    setBoardTilt(Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y)))
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    const xr = Math.max(0, Math.min(1, x))
+    const yr = Math.max(0, Math.min(1, y))
+    setBoardTilt(xr, yr)
+    setBoardLight(xr, yr)
+  }
 }
 
 function onPointerLeave() {
   if (!view3d.value)
     return
   setBoardTilt(0.5, 0.35)
+  setBoardLight(0.3, 0.2)
+}
+
+function onDeviceOrientation(e: DeviceOrientationEvent) {
+  if (!view3d.value)
+    return
+  const gamma = e.gamma ?? 0 // left/right (-90..90)
+  const beta = e.beta ?? 0 // front/back (-180..180)
+  const xr = Math.max(0, Math.min(1, 0.5 + gamma / 70))
+  const yr = Math.max(0, Math.min(1, 0.35 + beta / 90))
+  setBoardTilt(xr, yr)
+  setBoardLight(xr, yr)
+}
+
+async function enableGyro() {
+  if (gyroListening)
+    return
+  if (gyroPermission === 'denied')
+    return
+
+  if (gyroPermission === 'unknown') {
+    const anyOrientation = DeviceOrientationEvent as any
+    if (typeof anyOrientation?.requestPermission === 'function') {
+      try {
+        const res = await anyOrientation.requestPermission()
+        gyroPermission = res === 'granted' ? 'granted' : 'denied'
+      }
+      catch {
+        gyroPermission = 'denied'
+      }
+    }
+    else {
+      gyroPermission = 'granted'
+    }
+  }
+
+  if (gyroPermission !== 'granted')
+    return
+
+  window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true })
+  gyroListening = true
+}
+
+function disableGyro() {
+  if (!gyroListening)
+    return
+  window.removeEventListener('deviceorientation', onDeviceOrientation as any)
+  gyroListening = false
 }
 
 watch(() => view3d.value, (v) => {
-  if (v)
+  if (v) {
     setBoardTilt(0.5, 0.35)
+    setBoardLight(0.3, 0.2)
+    void enableGyro()
+  }
+  else {
+    disableGyro()
+  }
+})
+
+onUnmounted(() => {
+  disableGyro()
+  clearTimeout(kickTimer)
+  clearTimeout(flipTimer)
 })
 </script>
 
@@ -380,28 +497,44 @@ watch(() => view3d.value, (v) => {
           :style="sizeStyle"
           :class="[
             block.number === emptyFlag ? 'tile-empty' : '',
-            block?.animateY ? 'animate-shake-y' : '',
-            block?.animateX ? 'animate-shake-x' : '',
+            block?.animateY ? 'animate-move-y' : '',
+            block?.animateX ? 'animate-move-x' : '',
             hinted === block.number ? 'tile-hint' : '',
           ]"
           @click.prevent="moveTile(block)"
         >
-          <span v-show="block.number !== emptyFlag" class="tile-text">
-            {{ block.number }}
-          </span>
           <div
-            v-show="block.number !== emptyFlag && nightMode"
-            absolute
-            class="w-100% h-100%"
-            :class="[
-              currentPos === String(block.number) && 'animate',
-              isDark ? 'bg-white' : 'bg-dark-400',
-            ]"
-            z-50
-            left-0
-            top-0
-            @click.stop="openBlock(block)"
-          />
+            class="tile-move"
+            :style="{
+              '--mx': `${((block.moveX ?? 0) * 110).toFixed(0)}%`,
+              '--my': `${((block.moveY ?? 0) * 110).toFixed(0)}%`,
+            } as any"
+          >
+            <div
+              class="tile-flip"
+              :class="[
+                block.flip ? 'tile-flip-anim' : '',
+                block.flipAxis === 'x' ? 'tile-flip-x' : 'tile-flip-y',
+              ]"
+            >
+              <span v-show="block.number !== emptyFlag" class="tile-text">
+                {{ block.number }}
+              </span>
+              <div
+                v-show="block.number !== emptyFlag && nightMode"
+                absolute
+                class="w-100% h-100%"
+                :class="[
+                  currentPos === String(block.number) && 'animate',
+                  isDark ? 'bg-white' : 'bg-dark-400',
+                ]"
+                z-50
+                left-0
+                top-0
+                @click.stop="openBlock(block)"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -420,6 +553,9 @@ watch(() => view3d.value, (v) => {
   touch-action: manipulation;
   --rx: -10deg;
   --ry: 8deg;
+  --kick: 0px;
+  --lx: 30%;
+  --ly: 20%;
 }
 
 html.dark .board {
@@ -430,7 +566,7 @@ html.dark .board {
 .tile {
   border: 1px solid rgba(120, 120, 120, 0.12);
   border-radius: 14px;
-  background: radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55));
+  background: radial-gradient(140% 120% at var(--lx) var(--ly), rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55));
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
   user-select: none;
@@ -465,19 +601,53 @@ html.dark .tile-empty {
   font-size: 1.1rem;
 }
 
+.tile-move {
+  width: 100%;
+  height: 100%;
+}
+
+.tile-flip {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.tile-flip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(140% 120% at var(--lx) var(--ly), rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 60%);
+  opacity: 0.8;
+}
+
+html.dark .tile-flip::before {
+  background: radial-gradient(140% 120% at var(--lx) var(--ly), rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%);
+  opacity: 0.85;
+}
+
+.tile-empty .tile-flip::before {
+  display: none;
+}
+
 .tile-hint {
   box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.75), 0 14px 26px rgba(255, 214, 10, 0.15);
 }
 
 .board.is-3d {
-  perspective: 1200px;
-  perspective-origin: 50% 35%;
+  perspective: 950px;
+  perspective-origin: 50% 30%;
 }
 
 .board.is-3d .board-inner {
   transform-style: preserve-3d;
-  transform: rotateX(var(--rx)) rotateY(var(--ry));
-  transition: transform 120ms ease;
+  transform: translateZ(var(--kick)) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
 }
 
 .board.is-3d .tile {
@@ -524,6 +694,57 @@ html.dark .tile-empty {
   display: none;
 }
 
+@keyframes tile-move {
+  from {
+    transform: translate3d(var(--mx), var(--my), 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-move-x .tile-move,
+.animate-move-y .tile-move {
+  animation: tile-move 180ms cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+@keyframes tile-flip-x {
+  0% {
+    transform: rotateX(0);
+  }
+
+  50% {
+    transform: rotateX(180deg);
+  }
+
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+@keyframes tile-flip-y {
+  0% {
+    transform: rotateY(0);
+  }
+
+  50% {
+    transform: rotateY(180deg);
+  }
+
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.tile-flip-anim.tile-flip-x {
+  animation: tile-flip-x 220ms ease;
+}
+
+.tile-flip-anim.tile-flip-y {
+  animation: tile-flip-y 220ms ease;
+}
+
 @keyframes slide {
   from {
     transform: rotateX(0);
@@ -540,22 +761,16 @@ html.dark .tile-empty {
   animation: slide 0.5s linear;
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
+@media (prefers-reduced-motion: reduce) {
+  .board.is-3d .board-inner {
+    transition: none;
   }
 
-  50% {
-    transform: translateX(-5px);
+  .animate-move-x .tile-move,
+  .animate-move-y .tile-move,
+  .tile-flip-anim.tile-flip-x,
+  .tile-flip-anim.tile-flip-y {
+    animation: none;
   }
-}
-
-.animate-shake-x {
-  animation: shake 0.3s ease;
-}
-
-.animate-shake-y {
-  animation: shake 0.3s ease;
 }
 </style>
